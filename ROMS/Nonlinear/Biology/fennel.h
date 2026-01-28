@@ -707,7 +707,6 @@
 !  other attenuation contributions like suspended sediment or CDOM
 !  modify AttFac.
 !
-                AttFac=MAX(-0.0238_r8*Bio(i,k,isalt)+0.6664_r8, 0.0_r8)
                 Att=(AttSW(ng)+                                         &
      &               AttChl(ng)*Bio(i,k,iChlo)+                         &
      &               AttFac)*                                           &
