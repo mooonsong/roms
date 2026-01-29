@@ -21,6 +21,7 @@
 **         npzd_iron.h        NPZD_IRON                               **
 **         npzd_Powell.h      NPZD_POWELL                             **
 **         red_tide.h         RED_TIDE                                **
+**         reduced_bgc.h      REDUCED_BGC                             **
 **                                                                    **
 **   (2) Internal model parameters declaration:                       **
 **                                                                    **
@@ -33,6 +34,7 @@
 **         npzd_iron_mod.h                                            **
 **         npzd_Powell_mod.h                                          **
 **         red_tide_mod.h                                             **
+**         reduced_bgc_mod.h                                          **
 **                                                                    **
 **   (3) Model parameters standard input script:                      **
 **                                                                    **
@@ -45,6 +47,7 @@
 **         npzd_iron.in                                               **
 **         npzd_Powell.in                                             **
 **         red_tide.in                                                **
+**         reduced_bgc.in                                             **
 **                                                                    **
 **   (4) Code to read input model parameters:                         **
 **                                                                    **
@@ -57,6 +60,7 @@
 **         npzd_iron_inp.h                                            **
 **         npzd_Powell_inp.h                                          **
 **         red_tide_inp.h                                             **
+**         reduced_bgc_inp.h                                          **
 **                                                                    **
 **   (5) Code to assign indices to model variables during the         **
 **       reading of metadata information from "varinfo.yaml":         **
@@ -70,6 +74,7 @@
 **         npzd_iron_var.h                                            **
 **         npzd_Powell_var.h                                          **
 **         red_tide_var.h                                             **
+**         reduced_bgc_var.h                                          **
 **                                                                    **
 **   (6) Code to define input model parameters in all output          **
 **       NetCDF files:                                                **
@@ -83,6 +88,7 @@
 **         npzd_iron_def.h                                            **
 **         npzd_Powell_def.h                                          **
 **         red_tide_def.h                                             **
+**         reduced_bgc_def.h                                          **
 **                                                                    **
 **   (7) Code to write out input model parameters in all output       **
 **       NetCDF files:                                                **
@@ -96,6 +102,7 @@
 **         npzd_iron_wrt.h                                            **
 **         npzd_Powell_wrt.h                                          **
 **         red_tide_wrt.h                                             **
+**         reduced_bgc_wrt.h                                          **
 **                                                                    **
 **                                                                    **
 ** Note that all the *.h files are located in ROMS/Nonlinear/Biology  **
@@ -124,6 +131,8 @@
 #  include <npzd_Powell.h>
 # elif defined RED_TIDE
 #  include <red_tide.h>
+# elif defined REDUCED_BGC
+#  include <reduced_bgc.h>
 # endif
 #else
       MODULE biology_mod

@@ -2963,6 +2963,8 @@
 #  include <npzd_Powell_def.h>
 # elif defined RED_TIDE
 #  include <red_tide_def.h>
+# elif defined REDUCED_BGC
+#  include <reduced_bgc_def.h>
 # endif
 #endif
 

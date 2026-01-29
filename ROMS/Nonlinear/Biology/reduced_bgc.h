@@ -1,76 +1,40 @@
       MODULE biology_mod
+      implicit none
 !
-!git $Id$
-!=======================================================================
-!  Copyright (c) 2002-2025 The ROMS Group                              !
+      PRIVATE
+      PUBLIC  :: biology
+!
+      CONTAINS
+
+      SUBROUTINE biology (ng,tile)
+!
+!svn $Id$
+!***********************************************************************
+!  Copyright (c) 2002-2021 The ROMS/TOMS Group                         !
 !    Licensed under a MIT/X style license           Hernan G. Arango   !
-!    See License_ROMS.md                                Katja Fennel   !
-!========================================== Alexander F. Shchepetkin ===
+!                                                       Katja Fennel   !
+!    See License_ROMS.txt                             Arnaud Laurent   !
+!****************************************** Alexander F. Shchepetkin ***
 !                                                                      !
 !  This routine computes the  biological sources and sinks for the     !
-!  Fennel et al. (2006) ecosystem model. Then, it adds those terms     !
-!  to the global biological fields.                                    !
+!  Simple BGC model. Then, it  adds  those  terms  to  the  global     !
+!  biological fields.  This routine builds on the biological model     !
+!  of Fennel et al. (2006, 2008).                                      !
 !                                                                      !
-!  This model is loosely based on the model by Fasham et al. (1990)    !
-!  but it differs in many respects.  The detailed equations of the     !
-!  nitrogen cycling component  are given in  Fennel et al. (2006).     !
-!  Nitrogen is the  fundamental elemental  currency in this model.     !
-!  This model was adapted from a code written originally  by  John     !
-!  Moisan and Emanule DiLorenzo.                                       !
-!                                                                      !
-!  It is recommended to activate always the  "BIO_SEDIMENT" option     !
-!  to ensure conservation of mass by converting the organic matter     !
-!  that is sinking out of the bottom most grid cell into inorganic     !
-!  nutrients (i.e.,  instantanaous remineralization  at the water-     !
-!  sediment interface). Additionally, the "DENITRIFICATION" option     !
-!  can be activated.  Hence, a fraction of the instantenous bottom     !
-!  remineralization is  assumed to  occur  through  the  anearobic     !
-!  (denitrification)  pathway  and  thus  lost  from the  pool  of     !
-!  biologically availalbe fixed nitrogen. See Fennel et al. (2006)     !
-!  for details.                                                        !
-!                                                                      !
-!  Additional  options can be  activated to  enable  simulation of     !
-!  inorganic carbon and dissolved oxygen.  Accounting of inorganic     !
-!  carbon is activated by the "CARBON" option,  and results in two     !
-!  additional  biological  tracer  variables:  DIC and alkalinity.     !
-!  See Fennel et al. (2008) for details.                               !
+!  The simulation of  inorganic carbon and dissolved oxygen can be     !
+!  activated independently with the options "CARBON" and "OXYGEN",     !
+!  respectively. One of the two options is mandatory.                  !
 !                                                                      !
 !  If the "pCO2_RZ" options is activated, in addition to "CARBON",     !
 !  the carbonate system  routines by Zeebe and Wolf-Gladrow (2001)     !
 !  are used,  while the  OCMIP  standard routines are the default.     !
-!  There are two different ways of treating alkalinity.  It can be     !
-!  treated diagnostically (default),  in this case alkalinity acts     !
-!  like a passive tracer  that is  not affected  by changes in the     !
-!  concentration of  nitrate or ammonium.  However,  if the option     !
-!  "TALK_NONCONSERV" is used,  the alkalinity  will be affected by     !
-!  sources and sinks in nitrate. See Fennel et al. (2008) for more     !
-!  details.                                                            !
+!  Alkalinity is treated diagnostically as a function of salinity.     !
 !                                                                      !
-!  If the "OXYGEN" option is activated,  one additional biological     !
-!  tracer variable for dissolved oxygen. "OXYGEN" can be activated     !
-!  independently of the  "CARBON"  option. If "OCMIP_OXYGEN_SC" is     !
-!  used, in addition to "OXYGEN",  the Schmidt number of oxygen in     !
+!  If "OCMIP_OXYGEN_SC" is used the  Schmidt  number  of oxygen in     !
 !  seawater will be  computed  using the  formulation  proposed by     !
 !  Keeling et al. (1998, Global Biogeochem. Cycles,  12, 141-163).     !
 !  Otherwise,  the Wanninkhof (1992)  formula will be used. See        !
 !  Fennel et al. (2013) for more details.                              !
-!                                                                      !
-!***********************************************************************
-!  UPDATE Sept 2020                                                    !
-!                                                                      !
-!  In this  version  additional  tracers,  additional   alkalinity     !
-!  fluxes, and an updated parameterization of air-sea O2  and  CO2     !
-!  fluxes are added as described in Laurent et al. (2017).             !
-!                                                                      !
-!  If "PO4" is activated,   one  additional biological tracer   is     !
-!  added  representing phosphate.  With this option  phytoplankton     !
-!  growth can be limited by either  nitrogen and phosphorus.  This     !
-!  option was introduced in Laurent et al. (2012).                     !
-!                                                                      !
-!  If "RIVER_DON"  is activated,  an additional  biological tracer     !
-!  (or 2 if "CARBON" is defined) is added representing non-sinking     !
-!  dissolved organic matter from rivers as  described in Yu et al.     !
-!  (2015).                                                             !
 !                                                                      !
 !  If the "RW14_OXYGEN_SC" and/or  "RW14_CO2_SC" options are used,     !
 !  the model will use Wanninkhof (2014) air-sea flux parameteri-       !
@@ -79,13 +43,18 @@
 !  (2017).                                                             !
 !                                                                      !
 !  With the  "PCO2AIR_DATA"  option,   atmospheric pCO2  uses  the     !
-!  climatology of  Laurent et al. (2017).   The  "PCO2AIR_SECULAR"     !
-!  option provides an alternative time-dependent atmospheric  pCO2     !
-!  evolution.   If none of the 2 options are defined,  atmospheric     !
-!  pCO2 is constant.                                                   !
+!  climatology of  Laurent et al. (2017).   The  "PCO2AIR_MAUNALOA"    !
+!  and "PCO2AIR_SABLEISLAND"  options  provide an alternative time-    !
+!  dependent  atmospheric  pCO2  evolution  that  matches the          !
+!  observations from the Mauna Loa observatory (1958-2020) or from     !
+!  Sable Island (Rutherford et al., 2021),  respectively.  If none     !
+!  of the 2 options are defined, atmospheric pCO2 is constant.         !
 !                                                                      !
+!  Temperature dependent water column respiration can be activated     !
+!  with the option "TEMP_RATES" (see Laurent et al., 2021).            !
 !                                                                      !
 !***********************************************************************
+
 !  References:                                                         !
 !                                                                      !
 !    Fennel, K., Wilkin, J., Levin, J., Moisan, J., O^Reilly, J.,      !
@@ -109,26 +78,21 @@
 !      Atchafalaya River Plumes. Biogeosciences, 9 (11), 4707-4723,    !
 !      doi:10.5194/bg-9-4707-2012.                                     !
 !                                                                      !
-!    Yu, L., Fennel, K., Laurent, A., Murrell, M. C., Lehrter, J. C.   !
-!      2015: Numerical Analysis of the Primary Processes Controlling   !
-!      Oxygen Dynamics on the Louisiana Shelf. Biogeosciences, 12 (7), !
-!      2063-2076, doi:10.5194/bg-12-2063-2015.                         !
+!    Laurent, A., Fennel, K., Kuhn, A. 2021: An observation-based      !
+!      evaluation and ranking of historical Earth system model         !
+!      simulations in the northwest North Atlantic Ocean.              !
+!      Biogeosciences, 18 (5), 1803–1822, doi:10.5194/bg-18-1803-2021. ! 
+!                                                                      !
+!    Rutherford, K. and Fennel, K. and Atamanchuk, D. and Wallace, D.  !
+!      and Thomas, H., 2021: A modelling study of temporal and spatial !
+!      pCO2 variability on the biologically active and temperature-    !
+!      dominated Scotian Shelf. Biogeosciences, 18 (23), 6271-6286,    !
+!      doi: 10.5194/bg-18-6271-2021.                                   !
 !                                                                      !
 !    Wanninkhof, R. 2014: Relationship between Wind Speed and Gas      !
 !      Exchange over the Ocean Revisited. Limnol. Oceanogr. Methods    !
 !      12 (6), 351-362, doi:10.4319/lom.2014.12.351.                   !
 !                                                                      !
-!=======================================================================
-!
-      implicit none
-!
-      PRIVATE
-      PUBLIC  :: biology
-!
-      CONTAINS
-!
-!***********************************************************************
-      SUBROUTINE biology (ng,tile)
 !***********************************************************************
 !
       USE mod_param
@@ -168,40 +132,54 @@
 #ifdef PROFILE
       CALL wclock_on (ng, iNLM, 15, __LINE__, MyFile)
 #endif
-      CALL fennel_tile (ng, tile,                                       &
-     &                  LBi, UBi, LBj, UBj, N(ng), NT(ng),              &
-     &                  IminS, ImaxS, JminS, JmaxS,                     &
-     &                  nstp(ng), nnew(ng),                             &
+      CALL biology_tile (ng, tile,                                      &
+     &                   LBi, UBi, LBj, UBj, N(ng), NT(ng),             &
+     &                   IminS, ImaxS, JminS, JmaxS,                    &
+     &                   nstp(ng), nnew(ng),                            &
 #ifdef MASKING
-     &                  GRID(ng) % rmask,                               &
+     &                   GRID(ng) % rmask,                              &
 # ifdef WET_DRY
-     &                  GRID(ng) % rmask_wet,                           &
+     &                   GRID(ng) % rmask_wet,                          &
 #  ifdef DIAGNOSTICS_BIO
-     &                  GRID(ng) % rmask_full,                          &
+     &                   GRID(ng) % rmask_full,                         &
 #  endif
 # endif
 #endif
-     &                  GRID(ng) % Hz,                                  &
-     &                  GRID(ng) % z_r,                                 &
-     &                  GRID(ng) % z_w,                                 &
-     &                  FORCES(ng) % srflx,                             &
+     &                   GRID(ng) % Hz,                                 &
+     &                   GRID(ng) % z_r,                                &
+     &                   GRID(ng) % z_w,                                &
+     &                   GRID(ng) % lonr,                               &
+     &                   GRID(ng) % latr,                               &
+#if defined TALK_ADDITION
+     &                   GRID(ng) % pm,                                 &
+     &                   GRID(ng) % pn,                                 &
+# ifdef TALK_FILE
+     &                   FORCES(ng) % taflx,                            &
+     &                   FORCES(ng) % tatype,                           &
+     &                   FORCES(ng) % takmin,                           &
+     &                   FORCES(ng) % takmax,                           &
+# endif
+#endif
 #if defined CARBON || defined OXYGEN
 # ifdef BULK_FLUXES
-     &                  FORCES(ng) % Uwind,                             &
-     &                  FORCES(ng) % Vwind,                             &
+     &                   FORCES(ng) % Uwind,                            &
+     &                   FORCES(ng) % Vwind,                            &
 # else
-     &                  FORCES(ng) % sustr,                             &
-     &                  FORCES(ng) % svstr,                             &
+     &                   FORCES(ng) % sustr,                            &
+     &                   FORCES(ng) % svstr,                            &
 # endif
 #endif
 #ifdef CARBON
-     &                  OCEAN(ng) % pH,                                 &
+     &                   OCEAN(ng) % pH,                                &
+     &                   OCEAN(ng) % pHc,                               &
+# ifdef TALK_ADDITION
+     &                   OCEAN(ng) % pHa,                               &
+# endif
 #endif
 #ifdef DIAGNOSTICS_BIO
-     &                  DIAGS(ng) % DiaBio2d,                           &
-     &                  DIAGS(ng) % DiaBio3d,                           &
+     &                   DIAGS(ng) % DiaBio2d,                          &
 #endif
-     &                  OCEAN(ng) % t)
+     &                   OCEAN(ng) % t)
 
 #ifdef PROFILE
       CALL wclock_off (ng, iNLM, 15, __LINE__, MyFile)
@@ -211,34 +189,47 @@
       END SUBROUTINE biology
 !
 !-----------------------------------------------------------------------
-      SUBROUTINE fennel_tile (ng, tile,                                 &
-     &                        LBi, UBi, LBj, UBj, UBk, UBt,             &
-     &                        IminS, ImaxS, JminS, JmaxS,               &
-     &                        nstp, nnew,                               &
+      SUBROUTINE biology_tile (ng, tile,                                &
+     &                         LBi, UBi, LBj, UBj, UBk, UBt,            &
+     &                         IminS, ImaxS, JminS, JmaxS,              &
+     &                         nstp, nnew,                              &
 #ifdef MASKING
-     &                        rmask,                                    &
+     &                         rmask,                                   &
 # if defined WET_DRY
-     &                        rmask_wet,                                &
+     &                         rmask_wet,                               &
 #  ifdef DIAGNOSTICS_BIO
-     &                        rmask_full,                               &
+     &                         rmask_full,                              &
 #  endif
 # endif
 #endif
-     &                        Hz, z_r, z_w, srflx,                      &
+     &                         Hz, z_r, z_w,                            &
+     &                         lonr, latr,                              &
+# ifdef TALK_ADDITION
+     &                         pm, pn,                                  &
+#  ifdef TALK_FILE
+     &                         taflx,                                   &
+     &                         tatype,                                  &
+     &                         takmin,                                  &
+     &                         takmax,                                  &
+#  endif
+# endif
 #if defined CARBON || defined OXYGEN
 # ifdef BULK_FLUXES
-     &                        Uwind, Vwind,                             &
+     &                         Uwind, Vwind,                            &
 # else
-     &                        sustr, svstr,                             &
+     &                         sustr, svstr,                            &
 # endif
 #endif
 #ifdef CARBON
-     &                        pH,                                       &
+     &                         pH, pHc,                                 &
+# ifdef TALK_ADDITION
+     &                         pHa,                                     &
+# endif
 #endif
 #ifdef DIAGNOSTICS_BIO
-     &                        DiaBio2d, DiaBio3d,                       &
+     &                         DiaBio2d,                                &
 #endif
-     &                        t)
+     &                         t)
 !-----------------------------------------------------------------------
 !
       USE mod_param
@@ -255,38 +246,50 @@
       integer, intent(in) :: IminS, ImaxS, JminS, JmaxS
       integer, intent(in) :: nstp, nnew
 
-#ifdef ASSUMED_SHAPE
-# ifdef MASKING
-      real(r8), intent(in) :: rmask(LBi:,LBj:)
-#  ifdef WET_DRY
-      real(r8), intent(in) :: rmask_wet(LBi:,LBj:)
-#   ifdef DIAGNOSTICS_BIO
-      real(r8), intent(in) :: rmask_full(LBi:,LBj:)
-#   endif
-#  endif
-# endif
-      real(r8), intent(in) :: Hz(LBi:,LBj:,:)
-      real(r8), intent(in) :: z_r(LBi:,LBj:,:)
-      real(r8), intent(in) :: z_w(LBi:,LBj:,0:)
-      real(r8), intent(in) :: srflx(LBi:,LBj:)
-# if defined CARBON || defined OXYGEN
-#  ifdef BULK_FLUXES
-      real(r8), intent(in) :: Uwind(LBi:,LBj:)
-      real(r8), intent(in) :: Vwind(LBi:,LBj:)
-#  else
-      real(r8), intent(in) :: sustr(LBi:,LBj:)
-      real(r8), intent(in) :: svstr(LBi:,LBj:)
-#  endif
-# endif
-# ifdef CARBON
-      real(r8), intent(inout) :: pH(LBi:,LBj:)
-# endif
-# ifdef DIAGNOSTICS_BIO
-      real(r8), intent(inout) :: DiaBio2d(LBi:,LBj:,:)
-      real(r8), intent(inout) :: DiaBio3d(LBi:,LBj:,:,:)
-# endif
-      real(r8), intent(inout) :: t(LBi:,LBj:,:,:,:)
-#else
+!#ifdef ASSUMED_SHAPE
+!# ifdef MASKING
+!      real(r8), intent(in) :: rmask(LBi:,LBj:)
+!#  ifdef WET_DRY
+!      real(r8), intent(in) :: rmask_wet(LBi:,LBj:)
+!#   ifdef DIAGNOSTICS_BIO
+!      real(r8), intent(in) :: rmask_full(LBi:,LBj:)
+!#   endif
+!#  endif
+!# endif
+!      real(r8), intent(in) :: Hz(LBi:,LBj:,:)
+!      real(r8), intent(in) :: z_r(LBi:,LBj:,:)
+!      real(r8), intent(in) :: z_w(LBi:,LBj:,0:)
+!      real(r8), intent(in) :: lonr(LBi:,LBj:)
+!      real(r8), intent(in) :: latr(LBi:,LBj:)
+!# if defined CARBON || defined OXYGEN
+!#  ifdef BULK_FLUXES
+!      real(r8), intent(in) :: Uwind(LBi:,LBj:)
+!      real(r8), intent(in) :: Vwind(LBi:,LBj:)
+!#  else
+!      real(r8), intent(in) :: sustr(LBi:,LBj:)
+!      real(r8), intent(in) :: svstr(LBi:,LBj:)
+!#  endif
+!# endif
+!# ifdef CARBON
+!      real(r8), intent(inout) :: pH(LBi:,LBj:)
+!      real(r8), intent(inout) :: pHc(LBi:,LBj:)
+!#  ifdef TALK_ADDITION
+!      real(r8), intent(inout) :: pHa(LBi:,LBj:)
+!      real(r8), intent(in) :: pm(LBi:,LBj:)
+!      real(r8), intent(in) :: pn(LBi:,LBj:)
+!#   ifdef TALK_FILE
+!      real(r8), intent(in) :: taflx(LBi:,LBj:)
+!      real(r8), intent(in) :: tatype(LBi:,LBj:)
+!      real(r8), intent(in) :: takmin(LBi:,LBj:)
+!      real(r8), intent(in) :: takmax(LBi:,LBj:)
+!#   endif
+!#  endif
+!# endif
+!# ifdef DIAGNOSTICS_BIO
+!      real(r8), intent(inout) :: DiaBio2d(LBi:,LBj:,:)
+!# endif
+!      real(r8), intent(inout) :: t(LBi:,LBj:,:,:,:)
+!#else
 # ifdef MASKING
       real(r8), intent(in) :: rmask(LBi:UBi,LBj:UBj)
 #  ifdef WET_DRY
@@ -299,7 +302,8 @@
       real(r8), intent(in) :: Hz(LBi:UBi,LBj:UBj,UBk)
       real(r8), intent(in) :: z_r(LBi:UBi,LBj:UBj,UBk)
       real(r8), intent(in) :: z_w(LBi:UBi,LBj:UBj,0:UBk)
-      real(r8), intent(in) :: srflx(LBi:UBi,LBj:UBj)
+      real(r8), intent(in) :: lonr(LBi:UBi,LBj:UBj)  
+      real(r8), intent(in) :: latr(LBi:UBi,LBj:UBj) 
 # if defined CARBON || defined OXYGEN
 #  ifdef BULK_FLUXES
       real(r8), intent(in) :: Uwind(LBi:UBi,LBj:UBj)
@@ -311,30 +315,87 @@
 # endif
 # ifdef CARBON
       real(r8), intent(inout) :: pH(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: pHc(LBi:UBi,LBj:UBj)
+#  ifdef TALK_ADDITION
+      real(r8), intent(inout) :: pHa(LBi:UBi,LBj:UBj)
+      real(r8), intent(in) :: pm(LBi:UBi,LBj:UBj)
+      real(r8), intent(in) :: pn(LBi:UBi,LBj:UBj)
+#   ifdef TALK_FILE
+      real(r8), intent(in) :: taflx(LBi:UBi,LBj:UBj)
+      real(r8), intent(in) :: tatype(LBi:UBi,LBj:UBj)
+      real(r8), intent(in) :: takmin(LBi:UBi,LBj:UBj)
+      real(r8), intent(in) :: takmax(LBi:UBi,LBj:UBj)
+#   endif
+#  endif
 # endif
 # ifdef DIAGNOSTICS_BIO
       real(r8), intent(inout) :: DiaBio2d(LBi:UBi,LBj:UBj,NDbio2d)
-      real(r8), intent(inout) :: DiaBio3d(LBi:UBi,LBj:UBj,UBk,NDbio3d)
 # endif
       real(r8), intent(inout) :: t(LBi:UBi,LBj:UBj,UBk,3,UBt)
-#endif
+!#endif
+
 !
 !  Local variable declarations.
 !
-#ifdef CARBON
-      integer, parameter :: Nsink = 6
-#else
-      integer, parameter :: Nsink = 4
-#endif
 
-      integer :: Iter, i, ibio, isink, itrc, ivar, j, k, ks
-
-      integer, dimension(Nsink) :: idsink
+      integer :: Iter, i, ibio, itrc, ivar, j, k, ks
 
       real(r8), parameter :: eps = 1.0e-20_r8
 
 #if defined CARBON || defined OXYGEN
       real(r8) :: u10squ
+#endif
+#if defined PP_SS
+      real(r8) :: sscycle                                  ! annual cycle of primary production (shelf)
+      real(r8) :: bbcycle                                  ! annual cycle of primary production (harbour)
+#elif defined PP_NWA || defined SOC_NWA
+      real(r8) :: fac6, fac7, fac8, fac9, fac10, fac11, fac12, fac13
+#endif
+#if defined SOC_HRM23 || defined SOC_H2 || defined SOC_H3 || defined SOC_H23
+!
+! Relationship from SOC in full BGC model
+!
+      real(r8), parameter :: SOC0 = -0.116199719_r8      ! depth
+      real(r8), parameter :: SOC1 = 0.000780643296_r8    ! depth**2
+      real(r8), parameter :: SOC2 = -0.00000116530194_r8 ! depth**3
+      real(r8), parameter :: SOC3 = -1.07793271_r8       ! lon
+      real(r8), parameter :: SOC4 = 1.23783499_r8        ! lat
+      real(r8), parameter :: SOC5 = -0.0777753527_r8     ! salt (bottom)
+      real(r8), parameter :: SOC6 = 0.554950115_r8       ! salt**2 (bottom)
+      real(r8), parameter :: SOC7 = -0.0108994968_r8     ! salt**3 (bottom)
+      real(r8), parameter :: SOC8 = -3.34465129_r8       ! temp (bottom)
+      real(r8), parameter :: SOC9 = 0.222124249_r8       ! temp**2 (bottom)
+      real(r8), parameter :: SOC10 = -0.00413222615_r8   ! temp**3 (bottom)
+      real(r8), parameter :: SOC11 = -0.0733407193_r8    ! salt (surface)
+      real(r8), parameter :: SOC12 = 0.307952604_r8      ! salt**2 (surface)
+      real(r8), parameter :: SOC13 = -0.00764143031_r8   ! salt**2 (surface)
+      real(r8), parameter :: SOC14 = 3.59905029_r8       ! temp (surface)
+      real(r8), parameter :: SOC15 = -0.307632876_r8     ! temp**2 (surface)
+      real(r8), parameter :: SOC16 = 0.00816292443_r8    ! temp**3 (surface)
+      real(r8), parameter :: SOC17 = -0.00896775491_r8   ! constant
+#elif defined SOC_NWA
+      real(r8) :: fyear
+      real(r8), parameter, dimension(6) :: SOC0 = (/ 1.31661433_r8,-0.01116848_r8,0.00972495_r8,-0.00039800_r8,0.72632097_r8,-0.23984224_r8/) ! North Shallow
+      real(r8), parameter, dimension(6) :: SOC1 = (/ 0.47708264_r8,-0.00377278_r8,0.00155015_r8,-0.00007310_r8,0.03889351_r8, 0.04305900_r8/) ! North Mid depths
+      real(r8), parameter, dimension(6) :: SOC2 = (/-0.66599737_r8, 0.00517620_r8,-0.0074901_r8,-0.00081454_r8,1.12531586_r8,-0.37025725_r8/) ! South Shallow
+      real(r8), parameter, dimension(6) :: SOC3 = (/-0.52101075_r8, 0.00934503_r8,-0.0046946_r8,-0.00010549_r8,0.22267824_r8,-0.04695529_r8/) ! South Mid depths
+#endif
+#if defined PP_NWA
+#  if !defined SOC_NWA
+      real(r8) :: fyear
+#  endif
+      real(r8), parameter, dimension(8) :: PP0 = (/ 162.49378243_r8, -1.28314680_r8,  1.36252600_r8,  0.09307475_r8,  0.98134401_r8,   -4.27079447_r8,  42.69347396_r8, -14.57635739_r8/) ! North Shallow
+      real(r8), parameter, dimension(8) :: PP1 = (/ 156.65324565_r8, -1.82603845_r8,  0.45018415_r8, -0.00298506_r8, -0.98988476_r8,   -1.52062682_r8,  30.75958894_r8,  -8.77117896_r8/) ! North Mid depths
+      real(r8), parameter, dimension(8) :: PP2 = (/  89.75440873_r8, -1.81246196_r8, -0.26136077_r8, -0.00028506_r8, 51.47253106_r8, -131.68408246_r8, 147.20939455_r8, -36.33339532_r8/) ! North Deep
+      real(r8), parameter, dimension(8) :: PP3 = (/  18.43988431_r8, -1.23164465_r8, -0.62797338_r8,  0.16888450_r8, 24.37651414_r8,   70.43694243_r8, -33.49054017_r8,   2.12852593_r8/) ! South Shallow
+      real(r8), parameter, dimension(8) :: PP4 = (/  42.44875611_r8, -1.00834459_r8, -0.27917196_r8, -0.00073139_r8, 32.75467135_r8,   34.53554322_r8,   9.36592999_r8,  -9.99185430_r8/) ! South Mid depths
+      real(r8), parameter, dimension(8) :: PP5 = (/  16.68114230_r8,  0.96595887_r8,  0.27357130_r8, -0.00867631_r8, 24.08209930_r8,  -20.81468033_r8,  62.01678867_r8, -22.14601924_r8/) ! South Deep
+      real(r8), parameter, dimension(10) :: Z50 = (/ -43.30835056_r8,  0.18009699_r8, -0.04255232_r8, -0.08777949_r8, -1.02904272_r8,    7.09087576_r8,  6.31712577_r8, -11.74699477_r8,  14.29115419_r8 , -4.22924950_r8/) ! North Shallow
+      real(r8), parameter, dimension(10) :: Z51 = (/ -65.67687758_r8,  0.17063621_r8, -0.03491390_r8,  0.00050451_r8, -26.54629079_r8, -15.81423291_r8, 62.72956469_r8, -18.15041485_r8, -10.59314266_r8,   3.43511065_r8/) ! North Mid depths
+      real(r8), parameter, dimension(10) :: Z52 = (/ -32.03809878_r8, -0.46779175_r8, -0.11352872_r8,  0.00047333_r8,   0.21600975_r8,  22.04537642_r8,  5.87282821_r8, -50.17885862_r8,  57.79302506_r8, -15.17809904_r8/) ! North Deep
+      real(r8), parameter, dimension(10) :: Z53 = (/ -53.54144760_r8,  0.13715448_r8, -0.35324706_r8, -0.08349285_r8,   2.47431634_r8,   7.79579078_r8,  3.09589666_r8, -15.96910970_r8,  16.66762929_r8 , -4.43780396_r8/) ! South Shallow
+      real(r8), parameter, dimension(10) :: Z54 = (/ -35.76600323_r8, -0.20504031_r8, -0.03834876_r8,  0.00011372_r8,  -9.93681948_r8,  -0.02248369_r8, 18.91068506_r8,  -0.10179996_r8 , -4.82354185_r8,   0.95613896_r8/) ! South Mid depths
+      real(r8), parameter, dimension(10) :: Z55 = (/ -37.23545327_r8,  0.10347078_r8,  0.04643287_r8, -0.00269739_r8, -18.39741363_r8,  -4.71055853_r8, 12.29527775_r8,  33.63154985_r8, -31.15131002_r8,   6.76549973_r8/) ! South Deep
 #endif
 #ifdef OXYGEN
 # if defined OCMIP_OXYGEN_SC
@@ -382,13 +443,25 @@
       real(r8), parameter :: OB2 =-0.0103410_r8
       real(r8), parameter :: OB3 =-0.00817083_r8
       real(r8), parameter :: OC0 =-0.000000488682_r8
-      real(r8), parameter :: rOxNO3= 8.625_r8       ! 138/16
-      real(r8), parameter :: rOxNH4= 6.625_r8       ! 106/16
       real(r8) :: l2mol = 1000.0_r8/22.3916_r8      ! liter to mol
 #endif
-#ifdef CARBON
+#if defined CARBON || defined PP_SS || defined PP_NWA || defined SOC_NWA
       integer :: year
+#endif
+#ifdef CARBON
       integer, parameter :: DoNewton = 0            ! pCO2 solver
+# if defined TALK_ADDITION
+      integer :: isink
+#  if defined TALK_TWO_FEED
+      integer, parameter :: Nsink = 2
+#  elif defined TALK_THREE_FEED
+      integer, parameter :: Nsink = 3
+#  else
+      integer, parameter :: Nsink = 1
+#  endif
+      integer, dimension(Nsink) :: idsink
+      real(r8), dimension(Nsink) :: Wbio
+# endif
 
 # if defined RW14_CO2_SC
       real(r8), parameter :: A_CO2 = 2116.8_r8      ! Schmidt number
@@ -402,7 +475,7 @@
       real(r8), parameter :: C_CO2 = 3.6276_r8      ! transfer
       real(r8), parameter :: D_CO2 = 0.043219_r8    ! coefficients
       real(r8), parameter :: E_CO2 = 0.0_r8
-#endif
+# endif
 
       real(r8), parameter :: A1 = -60.2409_r8       ! surface
       real(r8), parameter :: A2 = 93.4517_r8        ! CO2
@@ -414,36 +487,56 @@
       real(r8) :: pmonth                         ! months since Jan 1951
       real(r8) :: pCO2air_secular
       real(dp) :: yday
-
+#ifdef P_PRODUCTION || defined SOC_NWA
+      real(r8) :: fac5
+#endif
       real(r8), parameter :: pi2 = 6.2831853071796_r8
 
-      real(r8), parameter :: D0 = 282.6_r8          ! coefficients
-      real(r8), parameter :: D1 = 0.125_r8          ! to calculate
-      real(r8), parameter :: D2 =-7.18_r8           ! secular trend in
-      real(r8), parameter :: D3 = 0.86_r8           ! atmospheric pCO2
-      real(r8), parameter :: D4 =-0.99_r8
-      real(r8), parameter :: D5 = 0.28_r8
-      real(r8), parameter :: D6 =-0.80_r8
-      real(r8), parameter :: D7 = 0.06_r8
+# if defined PCO2AIR_MAUNALOA
+#  if !defined SOC_NWA || !defined PP_NWA
+      real(r8) :: fyear                                   ! fractional year
+#  endif
+      real(r8), parameter :: D0 = 0.338329060_r8
+      real(r8), parameter :: D1 = 108.589607716_r8        ! coefficients
+      real(r8), parameter :: D2 = 9.440999563_r8          ! to calculate
+      real(r8), parameter :: D3 = 2.838323785_r8          ! secular trend in
+      real(r8), parameter :: D4 = 0.922577614_r8          ! atmospheric pCO2
+      real(r8), parameter :: D5 = 0.999565480_r8
+      real(r8), parameter :: D6 = 0.782616227_r8
+      real(r8), parameter :: D7 = -157.853151556_r8
+      real(r8), parameter :: D8 = 33.919758714_r8
+      real(r8), parameter :: D9 = 0.012976532_r8
+      real(r8), parameter :: D10 = -50.053077642_r8
+      real(r8), parameter :: D11 = 48569.391919959_r8
+# elif defined PCO2AIR_SABLEISLAND
+#  if !defined SOC_NWA || !defined PP_NWA
+      real(r8) :: fyear                                    ! fractional year    
+#  endif
+      real(r8), parameter :: D0 = 72134.344240476_r8       ! coefficients to calculate
+      real(r8), parameter :: D1 = -73.611517390_r8         ! secular trend with a
+      real(r8), parameter :: D2 = 0.018864984_r8           ! realistic exponential increase
+      real(r8), parameter :: D3 = 5.477205011_r8           ! in atmospheric pCO2
+      real(r8), parameter :: D4 = 0.645274882_r8           ! from Sable Island
+      real(r8), parameter :: D5 = 1.128926486_r8           ! atm pCO2 data
+# endif
+#elif defined P_PRODUCTION
+      real(dp) :: yday
+      real(r8) :: fac5
 #endif
 
-      real(r8) :: Att, AttFac, ExpAtt, Itop, PAR
-      real(r8) :: Epp, L_NH4, L_NO3, LTOT, Vp
-#ifdef PO4
-      real(r8), parameter :: MinVal = 1.0e-6_r8
-
-      real(r8) :: L_PO4, LMIN, mu, cff6
-#endif
-      real(r8) :: Chl2C, dtdays, t_PPmax, inhNH4
+      real(r8) :: dtdays
 
       real(r8) :: cff, cff1, cff2, cff3, cff4, cff5
-#ifdef RIVER_DON
-      real(r8) :: cff7, cff8
-#endif
-      real(r8) :: fac1, fac2, fac3
+      real(r8) :: fac1, fac2, fac3, fac4
       real(r8) :: cffL, cffR, cu, dltL, dltR
 
-      real(r8) :: total_N
+#ifdef TALK_ADDITION
+      real(r8) :: Hadd
+#endif
+
+#ifdef TEMP_RATES
+      real(r8) :: WOC, WOC2, WOC3
+#endif
 
 #ifdef DIAGNOSTICS_BIO
       real(r8) :: fiter
@@ -455,31 +548,24 @@
 #endif
 
 #ifdef CARBON
-      real(r8) :: C_Flux_RemineL, C_Flux_RemineS, C_Flux_RemineR
-      real(r8) :: CO2_Flux, CO2_sol, SchmidtN, TempK
+      real(r8) :: CO2c_Flx, CO2a_Flx, CO2_sol, SchmidtN, TempK
 #endif
-
-      real(r8) :: N_Flux_Assim
-      real(r8) :: N_Flux_CoagD, N_Flux_CoagP
-      real(r8) :: N_Flux_Egest
-      real(r8) :: N_Flux_NewProd, N_Flux_RegProd
-      real(r8) :: N_Flux_Nitrifi
-      real(r8) :: N_Flux_Pmortal, N_Flux_Zmortal
-      real(r8) :: N_Flux_RemineL, N_Flux_RemineS, N_Flux_RemineR
-      real(r8) :: N_Flux_Zexcret, N_Flux_Zmetabo
-
-      real(r8), dimension(Nsink) :: Wbio
 
       integer, dimension(IminS:ImaxS,N(ng)) :: ksource
 
-      real(r8), dimension(IminS:ImaxS) :: PARsur
 #ifdef CARBON
       real(r8), dimension(IminS:ImaxS) :: pCO2
+      real(r8), dimension(IminS:ImaxS) :: pCO2c
+# ifdef TALK_ADDITION
+      real(r8), dimension(IminS:ImaxS) :: pCO2a
+!      real(r8) :: dtsec      ! modified by siyu 2026-12-26
+# endif
+      real(r8) :: dtsec 
 #endif
 
       real(r8), dimension(IminS:ImaxS,N(ng),NT(ng)) :: Bio
       real(r8), dimension(IminS:ImaxS,N(ng),NT(ng)) :: Bio_old
-
+      
       real(r8), dimension(IminS:ImaxS,0:N(ng)) :: FC
 
       real(r8), dimension(IminS:ImaxS,N(ng)) :: Hz_inv
@@ -490,6 +576,18 @@
       real(r8), dimension(IminS:ImaxS,N(ng)) :: bL
       real(r8), dimension(IminS:ImaxS,N(ng)) :: bR
       real(r8), dimension(IminS:ImaxS,N(ng)) :: qc
+
+!-----------------------------------------------------------------------------------------
+! Coefficients for temperature dependent rates 
+! Temperature dependency of the form: parameter(ng)*Tcoef0*(Tcoef1**Bio(i,k,itemp))
+!-----------------------------------------------------------------------------------------
+!
+!  (Eppley, R.W.,1972, Fishery Bulletin, 70: 1063-1085; growth rate
+!  provided in doublings per day. Here 0.59=ln(2)*0.851, i.e., growth rate
+!  per day is equal to ln(2)xdoubling per day).
+
+       real(r8), parameter :: Tcoef0 = 0.59_r8
+       real(r8), parameter :: Tcoef1 = 1.066_r8
 
 #include "set_bounds.h"
 #ifdef DIAGNOSTICS_BIO
@@ -509,15 +607,6 @@
             END DO
           END DO
         END DO
-        DO ivar=1,NDbio3d
-          DO k=1,N(ng)
-            DO j=Jstr,Jend
-              DO i=Istr,Iend
-                DiaBio3d(i,j,k,ivar)=0.0_r8
-              END DO
-            END DO
-          END DO
-        END DO
       END IF
 #endif
 !
@@ -532,6 +621,7 @@
 !  Set time-stepping according to the number of iterations.
 !
       dtdays=dt(ng)*sec2day/REAL(BioIter(ng),r8)
+      dtsec=dt(ng)/REAL(BioIter(ng),r8)
 #ifdef DIAGNOSTICS_BIO
 !
 !  A factor to account for the number of iterations in accumulating
@@ -539,29 +629,60 @@
 !
       fiter=1.0_r8/REAL(BioIter(ng),r8)
 #endif
-!
-!  Set vertical sinking indentification vector.
-!
-      idsink(1)=iPhyt
-      idsink(2)=iChlo
-      idsink(3)=iSDeN
-      idsink(4)=iLDeN
-#ifdef CARBON
-      idsink(5)=iSDeC
-      idsink(6)=iLDeC
+
+#ifdef PP_SS
+      CALL caldate (tdays(ng), yy_i=year, yd_dp=yday)
+      sscycle=0.15_r8+0.96_r8*((COS(0.00834_r8*yday-1.0_r8)             &
+     &        +1.0_r8)**24.0_r8/16777141.0_r8+(SIN(0.01428_r8*yday      &
+     &        -1.0_r8)+1.0_r8)**24.0_r8/55923804.0_r8                   &
+     &        +(SIN(0.01074_r8*yday-1.0_r8)                             &
+     &        +1.0_r8)**24.0_r8/27961902.0_r8                           &
+     &        +(SIN(0.00867_r8*yday-1.0_r8)+1.0_r8)**24/87961902.0_r8)
+
+      bbcycle=0.15_r8+4.0_r8*((COS(0.00834_r8*yday-1.0_r8)              &
+     &        +1.0_r8)**24.0_r8/16777141.0_r8+(SIN(0.01282_r8*yday      &
+     &        -1.0_r8)+1.0_r8)**24.0_r8/45923804.0_r8                   &
+     &        +(SIN(0.00945_r8*yday-1.0_r8)                             &
+     &        +1.0_r8)**24.0_r8/27961902.0_r8                           &
+     &        +(SIN(0.00867_r8*yday-1.0_r8)+1.0_r8)**24/87961902.0_r8)
+#elif defined PP_NWA || defined SOC_NWA
+      CALL caldate (tdays(ng), yy_i=year, yd_dp=yday)
+      fyear=year+MIN((yday-1.0_r8)/365.0_r8,1.0_r8)
+      fac6=SIN(pi2/2*fyear)
+      fac7=SIN(pi2*fyear)**2
+      fac8=MAX(SIN(pi2*fyear)**3,0.0_r8)
+      fac9=MAX(-SIN(pi2*fyear)**3,0.0_r8)
+      fac10=1.0_r8-COS(pi2*fyear)      ! fyear_cos1 = 1-np.cos(doy/365*2*np.pi)
+      fac11=(1.0_r8-COS(pi2*fyear))**2 ! fyear_cos2 = (1-np.cos(doy/365*2*np.pi))**2
+      fac12=(1.0_r8-COS(pi2*fyear))**3 ! fyear_cos3 = (1-np.cos(doy/365*2*np.pi))**3
+      fac13=(1.0_r8-COS(pi2*fyear))**4 ! fyear_cos4 = (1-np.cos(doy/365*2*np.pi))**4
 #endif
+
+# ifdef TALK_ADDITION
+!
+!  Set vertical sinking indentification.
+!
+      idsink(1)=iTAp1
+#  if defined TALK_TWO_FEED || defined TALK_THREE_FEED
+      idsink(2)=iTAp2
+#  endif
+#  ifdef TALK_THREE_FEED
+      idsink(3)=iTAp3
+#  endif
+
 !
 !  Set vertical sinking velocity vector in the same order as the
 !  identification vector, IDSINK.
 !
-      Wbio(1)=wPhy(ng)                ! phytoplankton
-      Wbio(2)=wPhy(ng)                ! chlorophyll
-      Wbio(3)=wSDet(ng)               ! small Nitrogen-detritus
-      Wbio(4)=wLDet(ng)               ! large Nitrogen-detritus
-#ifdef CARBON
-      Wbio(5)=wSDet(ng)               ! small Carbon-detritus
-      Wbio(6)=wLDet(ng)               ! large Carbon-detritus
-#endif
+      Wbio(1)=wTAp(1,ng)       ! sinking velocity of particulate feedstock (TAp1)
+#  if defined TALK_TWO_FEED || defined TALK_THREE_FEED
+      Wbio(2)=wTAp(2,ng)       ! sinking velocity of particulate feedstock 2 (TAp2)
+#  endif
+#  ifdef TALK_THREE_FEED
+      Wbio(3)=wTAp(3,ng)       ! sinking velocity of particulate feedstock 3 (TAp3)
+#  endif
+# endif
+
 !
 !  Compute inverse thickness to avoid repeated divisions.
 !
@@ -615,14 +736,6 @@
             Bio(i,k,itemp)=MIN(t(i,j,k,nstp,itemp),35.0_r8)
             Bio(i,k,isalt)=MAX(t(i,j,k,nstp,isalt), 0.0_r8)
           END DO
-        END DO
-!
-!  Calculate surface Photosynthetically Available Radiation (PAR).  The
-!  net shortwave radiation is scaled back to Watts/m2 and multiplied by
-!  the fraction that is photosynthetically available, PARfrac.
-!
-        DO i=Istr,Iend
-          PARsur(i)=PARfrac(ng)*srflx(i,j)*rho0*Cp
         END DO
 !
 !=======================================================================
@@ -681,417 +794,344 @@
 !  however, do not improve the accuaracy of the solution.
 !
         ITER_LOOP: DO Iter=1,BioIter(ng)
+
+#ifdef TEMP_RATES
+          WOC=WOC0(ng)*dtdays
+# if defined WOC_HRM23 || defined WOC_H2 || defined WOC_H3 || defined WOC_H23
+          WOC2=WOC20(ng)*dtdays
+          WOC3=WOC30(ng)*dtdays
+# endif
+#else
+          fac1=dtdays*WOC(ng)
+# if defined WOC_HRM23 || defined WOC_H2 || defined WOC_H3 || defined WOC_H23
+          fac3=dtdays*WOC2(ng)
+          fac4=dtdays*WOC3(ng)
+# endif
+#endif
+
+#ifdef TALK_ADDITION
+!-----------------------------------------------------------------------
+!  Get thickness of addition layer
+!-----------------------------------------------------------------------
+# if !defined TALK_FILE
+          IF (j.eq.jloc_alkalinity(ng)) THEN
+            Hadd=SUM(Hz(iloc_alkalinity(ng),jloc_alkalinity(ng),        &
+     &                kloc_alkalinity_min(ng):kloc_alkalinity_max(ng)))
+          END IF
+# endif
+#endif
+
+          DO k=1,N(ng)
+            DO i=Istr,Iend
+
+#ifdef TEMP_RATES
+          fac1=WOC*Tcoef0*(Tcoef1**Bio(i,k,itemp))
+# if defined WOC_HRM23 || defined WOC_H2 || defined WOC_H3 || defined WOC_H23
+          fac3=WOC2*Tcoef0*(Tcoef1**Bio(i,k,itemp))
+          fac4=WOC3*Tcoef0*(Tcoef1**Bio(i,k,itemp))
+# endif
+#endif
 !
 !-----------------------------------------------------------------------
-!  Light-limited computations.
+!  Compute primary production from relationship (function of z and temp)
 !-----------------------------------------------------------------------
 !
-!  Compute attenuation coefficient based on the concentration of
-!  chlorophyll-a within each grid box.  Then, attenuate surface
-!  photosynthetically available radiation (PARsur) down inot the
-!  water column.  Thus, PAR at certain depth depends on the whole
-!  distribution of chlorophyll-a above.
-!  To compute rate of maximum primary productivity (t_PPmax), one needs
-!  PAR somewhat in the middle of the gridbox, so that attenuation "Att"
-!  corresponds to half of the grid box height, while PAR is multiplied
-!  by it twice: once to get it in the middle of grid-box and once the
-!  compute on the lower grid-box interface.
-!
-          DO i=Istr,Iend
-            PAR=PARsur(i)
-            AttFac=0.0_r8
-            IF (PARsur(i).gt.0.0_r8) THEN
-              DO k=N(ng),1,-1
-!
-!  Compute average light attenuation for each grid cell. To include
-!  other attenuation contributions like suspended sediment or CDOM
-!  modify AttFac.
-!
-                AttFac=MAX(-0.0238_r8*Bio(i,k,isalt)+0.6664_r8, 0.0_r8)
-                Att=(AttSW(ng)+                                         &
-     &               AttChl(ng)*Bio(i,k,iChlo)+                         &
-     &               AttFac)*                                           &
-     &               (z_w(i,j,k)-z_w(i,j,k-1))
-                ExpAtt=EXP(-Att)
-                Itop=PAR
-                PAR=Itop*(1.0_r8-ExpAtt)/Att    ! average at cell center
-!
-!  Compute Chlorophyll-a phytoplankton ratio, [mg Chla / (mg C)].
-!
-                cff=PhyCN(ng)*12.0_r8
-                Chl2C=MIN(Bio(i,k,iChlo)/(Bio(i,k,iPhyt)*cff+eps),      &
-     &                    Chl2C_m(ng))
-!
-!  Temperature-limited and light-limited growth rate (Eppley, R.W.,
-!  1972, Fishery Bulletin, 70: 1063-1085; here 0.59=ln(2)*0.851).
-!  Check value for Vp is 2.9124317 at 19.25 degC.
-!
-                Vp=Vp0(ng)*0.59_r8*(1.066_r8**Bio(i,k,itemp))
-                fac1=PAR*PhyIS(ng)
-                Epp=Vp/SQRT(Vp*Vp+fac1*fac1)
-                t_PPmax=Epp*fac1
-!
-!  Nutrient-limitation terms (Parker 1993 Ecol Mod., 66, 113-120).
-!
-                cff1=Bio(i,k,iNH4_)*K_NH4(ng)
-                cff2=Bio(i,k,iNO3_)*K_NO3(ng)
-                inhNH4=1.0_r8/(1.0_r8+cff1)
-                L_NH4=cff1/(1.0_r8+cff1)
-                L_NO3=cff2*inhNH4/(1.0_r8+cff2)
-                LTOT=L_NO3+L_NH4
-#ifdef PO4
-                cff3=Bio(i,k,iPO4_)*K_PO4(ng)
-                L_PO4=cff3/(1.0_r8+cff3)
-                LMIN=MIN(LTOT,L_PO4)
-#endif
-!
-!  Nitrate and ammonium uptake by Phytoplankton.
-!
-#ifdef PO4
-                mu=dtdays*t_PPmax*LMIN
-                cff4=mu*Bio(i,k,iPhyt)*L_NO3/                           &
-     &               MAX(MinVal,LTOT)/MAX(MinVal,Bio(i,k,iNO3_))
-                cff5=mu*Bio(i,k,iPhyt)*L_NH4/                           &
-     &               MAX(MinVal,LTOT)/MAX(MinVal,Bio(i,k,iNH4_))
-                cff6=R_P2N(ng)*mu*Bio(i,k,iPhyt)/                       &
-     &               MAX(MinVal,Bio(i,k,iPO4_))
-#else
-                fac1=dtdays*t_PPmax
-                cff4=fac1*K_NO3(ng)*inhNH4/(1.0_r8+cff2)*Bio(i,k,iPhyt)
-                cff5=fac1*K_NH4(ng)/(1.0_r8+cff1)*Bio(i,k,iPhyt)
-#endif
-                Bio(i,k,iNO3_)=Bio(i,k,iNO3_)/(1.0_r8+cff4)
-                Bio(i,k,iNH4_)=Bio(i,k,iNH4_)/(1.0_r8+cff5)
-#ifdef PO4
-                Bio(i,k,iPO4_)=Bio(i,k,iPO4_)/(1.0_r8+cff6)
-#endif
-                N_Flux_NewProd=Bio(i,k,iNO3_)*cff4
-                N_Flux_RegProd=Bio(i,k,iNH4_)*cff5
-                Bio(i,k,iPhyt)=Bio(i,k,iPhyt)+                          &
-     &                         N_Flux_NewProd+N_Flux_RegProd
-!
-                Bio(i,k,iChlo)=Bio(i,k,iChlo)+                          &
-#ifdef PO4
-     &                         (dtdays*t_PPmax*t_PPmax*LMIN*LMIN*       &
-#else
-     &                         (dtdays*t_PPmax*t_PPmax*LTOT*LTOT*       &
-#endif
-     &                          Chl2C_m(ng)*Bio(i,k,iChlo))/            &
-     &                         (PhyIS(ng)*MAX(Chl2C,eps)*PAR+eps)
-#ifdef DIAGNOSTICS_BIO
-                DiaBio3d(i,j,k,iPPro)=DiaBio3d(i,j,k,iPPro)+            &
-# ifdef WET_DRY
-     &                                rmask_full(i,j)*                  &
-# endif
-     &                                (N_Flux_NewProd+N_Flux_RegProd)*  &
-     &                                fiter
-                DiaBio3d(i,j,k,iNO3u)=DiaBio3d(i,j,k,iNO3u)+            &
-# ifdef WET_DRY
-     &                                rmask_full(i,j)*                  &
-# endif
-     &                                N_Flux_NewProd*fiter
-#endif
-#ifdef OXYGEN
-                Bio(i,k,iOxyg)=Bio(i,k,iOxyg)+                          &
-     &                         N_Flux_NewProd*rOxNO3+                   &
-     &                         N_Flux_RegProd*rOxNH4
-#endif
-#ifdef CARBON
-!
-!  Total inorganic carbon (CO2) uptake during phytoplankton growth.
-!
-                cff1=PhyCN(ng)*(N_Flux_NewProd+N_Flux_RegProd)
-                Bio(i,k,iTIC_)=Bio(i,k,iTIC_)-cff1
-# ifdef TALK_NONCONSERV
-!
-!  Account for the uptake of NO3 on total alkalinity.
-!
-                Bio(i,k,iTAlk)=Bio(i,k,iTAlk)+N_Flux_NewProd-           &
-     &                         N_Flux_RegProd
-# endif
-#endif
-!
-! The Nitrification of NH4 ==> NO3 is thought to occur only in dark and
-! only in aerobic water (see Olson, R. J., 1981, JMR: (39), 227-238.).
-!
-!         NH4+ + 3/2 O2  ==> NO2- + H2O;  via Nitrosomonas bacteria
-!         NO2-  + 1/2 O2 ==> NO3-      ;  via Nitrobacter  bacteria
-!
-! Note that the entire process has a total loss of two moles of O2 per
-! mole of NH4. If we were to resolve NO2 profiles, this is where we
-! would change the code to split out the differential effects of the
-! two different bacteria types. If OXYGEN is defined, nitrification is
-! inhibited at low oxygen concentrations using a Michaelis-Menten term.
-!
-#ifdef OXYGEN
-                fac2=MAX(Bio(i,k,iOxyg),0.0_r8)     ! O2 max
-                fac3=MAX(fac2/(3.0_r8+fac2),0.0_r8) ! MM for O2 dependence
-                fac1=dtdays*NitriR(ng)*fac3
-#else
-                fac1=dtdays*NitriR(ng)
-#endif
-                cff1=(PAR-I_thNH4(ng))/                                 &
-     &               (D_p5NH4(ng)+PAR-2.0_r8*I_thNH4(ng))
-                cff2=1.0_r8-MAX(0.0_r8,cff1)
-                cff3=fac1*cff2
-                Bio(i,k,iNH4_)=Bio(i,k,iNH4_)/(1.0_r8+cff3)
-                N_Flux_Nitrifi=Bio(i,k,iNH4_)*cff3
-                Bio(i,k,iNO3_)=Bio(i,k,iNO3_)+N_Flux_Nitrifi
-#ifdef DIAGNOSTICS_BIO
-                DiaBio3d(i,j,k,iNifx)=DiaBio3d(i,j,k,iNifx)+            &
-# ifdef WET_DRY
-     &                                rmask_full(i,j)*                  &
-# endif
-     &                                N_Flux_Nitrifi*fiter
-#endif
-#ifdef OXYGEN
-                Bio(i,k,iOxyg)=Bio(i,k,iOxyg)-2.0_r8*N_Flux_Nitrifi
-#endif
-#if defined CARBON && defined TALK_NONCONSERV
-                Bio(i,k,iTAlk)=Bio(i,k,iTAlk)-2.0_r8*N_Flux_Nitrifi
-#endif
-!
-!  Light attenuation at the bottom of the grid cell. It is the starting
-!  PAR value for the next (deeper) vertical grid cell.
-!
-                PAR=Itop*ExpAtt
-              END DO
-!
-!  If PARsur=0, nitrification occurs at the maximum rate (NitriR).
-!
-            ELSE
-              cff3=dtdays*NitriR(ng)
-              DO k=N(ng),1,-1
-                Bio(i,k,iNH4_)=Bio(i,k,iNH4_)/(1.0_r8+cff3)
-                N_Flux_Nitrifi=Bio(i,k,iNH4_)*cff3
-                Bio(i,k,iNO3_)=Bio(i,k,iNO3_)+N_Flux_Nitrifi
-#ifdef DIAGNOSTICS_BIO
-                DiaBio3d(i,j,k,iNifx)=DiaBio3d(i,j,k,iNifx)+            &
-# ifdef WET_DRY
-     &                                rmask_full(i,j)*                  &
-# endif
-     &                                N_Flux_Nitrifi*fiter
-#endif
-#ifdef OXYGEN
-                Bio(i,k,iOxyg)=Bio(i,k,iOxyg)-2.0_r8*N_Flux_Nitrifi
-#endif
-#if defined CARBON && defined TALK_NONCONSERV
-                Bio(i,k,iTAlk)=Bio(i,k,iTAlk)-2.0_r8*N_Flux_Nitrifi
-#endif
-              END DO
+#ifdef P_PRODUCTION
+          fac2=0.0_r8
+# if defined PP_SS
+#  ifdef PP_HRM23
+              IF (((ng .eq. 1) .and. (i .lt. 51) .and. (j .gt. 247))    &
+     &                 .or. (ng .eq. 2)) THEN
+#  elif defined PP_H2
+              IF ((ng .eq. 1) .and. ((j .gt. 340) .or. ((i .gt. 135)    &
+     &                .and. j .gt. 320 ))) THEN
+#  elif defined PP_H3
+              IF ((ng .eq. 1) .and. ((j .gt. 150) .or. ((i .gt. 50)     &
+     &                .and. j .gt. 92 ))) THEN
+#  elif defined PP_H23
+              IF (((ng .eq. 1) .and. ((j .gt. 340) .or. ((i .gt. 135)   &
+     &                 .and. j .gt. 320 ))) .or.                        &
+                  ((ng .eq. 2) .and. ((j .gt. 150) .or. ((i .gt. 50)    &
+     &                 .and. j .gt. 92 )))) THEN
+#  else
+              IF (ng .eq. 0) THEN
+#  endif
+                IF ((z_r(i,j,k) .gt. -15.0_r8) .and.                    &
+     &             (z_w(i,j,0) .lt. -6.0_r8) .and. (j .lt. 390)) THEN
+          fac2=bbcycle
+                END IF
+              ELSE
+                IF ((z_r(i,j,k) .gt. -30.0_r8) .and.                    &
+     &             (z_w(i,j,0) .lt. -6.0_r8)) THEN
+          fac2=sscycle
+                END IF
+               END IF
+# elif defined PP_NWA
+            cff5=ABS(z_w(i,j,0))
+            IF ((latr(i,j) .ge. 53.45_r8) .or.                          &
+     &            ((latr(i,j) .ge. 50_r8) .and.                         &
+     &            (lonr(i,j) .le. -76_r8))) THEN      ! Northern area
+                IF ((cff5 .lt. 200_r8)) THEN        ! Shef area
+                  cff2=PP0(1)+PP0(2)*latr(i,j)+PP0(3)*lonr(i,j)+        &
+     &                 PP0(4)*cff5+PP0(5)*fac10+PP0(6)*fac11+           &
+     &                 PP0(7)*fac12+PP0(8)*fac13
+                  cff3=Z50(1)+Z50(2)*latr(i,j)+Z50(3)*lonr(i,j)+        &
+     &                 Z50(4)*cff5+Z50(5)*fac8+Z50(6)*fac9+Z50(7)*fac10+&
+     &                 Z50(8)*fac11+Z50(9)*fac12+Z50(10)*fac13
+                ELSEIF ((cff5 .lt. 3000_r8)) THEN   ! Slope area
+                  cff2=PP1(1)+PP1(2)*latr(i,j)+PP1(3)*lonr(i,j)+        &
+     &                 PP1(4)*cff5+PP1(5)*fac10+PP1(6)*fac11+           &
+     &                 PP1(7)*fac12+PP1(8)*fac13
+                  cff3=Z51(1)+Z51(2)*latr(i,j)+Z51(3)*lonr(i,j)+        &
+     &                 Z51(4)*cff5+Z51(5)*fac8+Z51(6)*fac9+Z51(7)*fac10+&
+     &                 Z51(8)*fac11+Z51(9)*fac12+Z51(10)*fac13
+                ELSE                                ! Deep area
+                  cff2=PP2(1)+PP2(2)*latr(i,j)+PP2(3)*lonr(i,j)+        &
+     &                 PP2(4)*cff5+PP2(5)*fac10+PP2(6)*fac11+           &
+     &                 PP2(7)*fac12+PP2(8)*fac13
+                  cff3=Z52(1)+Z52(2)*latr(i,j)+Z52(3)*lonr(i,j)+        &
+     &                 Z52(4)*cff5+Z52(5)*fac8+Z52(6)*fac9+Z52(7)*fac10+&
+     &                 Z52(8)*fac11+Z52(9)*fac12+Z52(10)*fac13
+                END IF
+            ELSE                   ! Southern area
+                IF ((cff5 .lt. 200_r8)) THEN        ! Shef area
+                  cff2=PP3(1)+PP3(2)*latr(i,j)+PP3(3)*lonr(i,j)+        &
+     &                 PP3(4)*cff5+PP3(5)*fac10+PP3(6)*fac11+           &
+     &                 PP3(7)*fac12+PP3(8)*fac13
+                  cff3=Z53(1)+Z53(2)*latr(i,j)+Z53(3)*lonr(i,j)+        &
+     &                 Z53(4)*cff5+Z53(5)*fac8+Z53(6)*fac9+Z53(7)*fac10+&
+     &                 Z53(8)*fac11+Z53(9)*fac12+Z53(10)*fac13
+                ELSEIF ((cff5 .lt. 3000_r8)) THEN   ! Slope area
+                  cff2=PP4(1)+PP4(2)*latr(i,j)+PP4(3)*lonr(i,j)+        &
+     &                 PP4(4)*cff5+PP4(5)*fac10+PP4(6)*fac11+           &
+     &                 PP4(7)*fac12+PP4(8)*fac13
+                  cff3=Z54(1)+Z54(2)*latr(i,j)+Z54(3)*lonr(i,j)+        &
+     &                 Z54(4)*cff5+Z54(5)*fac8+Z54(6)*fac9+Z54(7)*fac10+&
+     &                 Z54(8)*fac11+Z54(9)*fac12+Z54(10)*fac13
+                ELSE                                ! Deep area
+                  cff2=PP5(1)+PP5(2)*latr(i,j)+PP5(3)*lonr(i,j)+        &
+     &                 PP5(4)*cff5+PP5(5)*fac10+PP5(6)*fac12+           &
+     &                 PP5(7)*fac12+PP5(8)*fac13
+                  cff3=Z55(1)+Z55(2)*latr(i,j)+Z55(3)*lonr(i,j)+        &
+     &                 Z55(4)*cff5+Z55(5)*fac8+Z55(6)*fac9+Z55(7)*fac10+&
+     &                 Z55(8)*fac11+Z55(9)*fac12+Z55(10)*fac13
+                END IF
             END IF
-          END DO
-!
-!-----------------------------------------------------------------------
-!  Phytoplankton grazing by zooplankton (rate: ZooGR), phytoplankton
-!  assimilated to zooplankton (fraction: ZooAE_N) and egested to small
-!  detritus, and phytoplankton mortality (rate: PhyMR) to small
-!  detritus. [Landry 1993 L and O 38:468-472]
-!-----------------------------------------------------------------------
-!
-          fac1=dtdays*ZooGR(ng)
-          cff2=dtdays*PhyMR(ng)
-          DO k=1,N(ng)
-            DO i=Istr,Iend
-!
-! Phytoplankton grazing by zooplankton.
-!
-              cff1=fac1*Bio(i,k,iZoop)*Bio(i,k,iPhyt)/                  &
-     &             (K_Phy(ng)+Bio(i,k,iPhyt)*Bio(i,k,iPhyt))
-              cff3=1.0_r8/(1.0_r8+cff1)
-              Bio(i,k,iPhyt)=cff3*Bio(i,k,iPhyt)
-              Bio(i,k,iChlo)=cff3*Bio(i,k,iChlo)
-!
-! Phytoplankton assimilated to zooplankton and egested to small
-! detritus.
-!
-              N_Flux_Assim=cff1*Bio(i,k,iPhyt)*ZooAE_N(ng)
-              N_Flux_Egest=Bio(i,k,iPhyt)*cff1*(1.0_r8-ZooAE_N(ng))
-              Bio(i,k,iZoop)=Bio(i,k,iZoop)+                            &
-     &                       N_Flux_Assim
-              Bio(i,k,iSDeN)=Bio(i,k,iSDeN)+                            &
-     &                       N_Flux_Egest
-!
-! Phytoplankton mortality (limited by a phytoplankton minimum).
-!
-              N_Flux_Pmortal=cff2*MAX(Bio(i,k,iPhyt)-PhyMin(ng),0.0_r8)
-              Bio(i,k,iPhyt)=Bio(i,k,iPhyt)-N_Flux_Pmortal
-              Bio(i,k,iChlo)=Bio(i,k,iChlo)-                            &
-     &                       cff2*MAX(Bio(i,k,iChlo)-ChlMin(ng),0.0_r8)
-              Bio(i,k,iSDeN)=Bio(i,k,iSDeN)+                            &
-     &                       N_Flux_Pmortal
-#ifdef CARBON
-              Bio(i,k,iSDeC)=Bio(i,k,iSDeC)+                            &
-     &                       PhyCN(ng)*(N_Flux_Egest+N_Flux_Pmortal)+   &
-     &                       (PhyCN(ng)-ZooCN(ng))*N_Flux_Assim
-#endif
-            END DO
-          END DO
-!
-!-----------------------------------------------------------------------
-!  Zooplankton basal metabolism to NH4  (rate: ZooBM), zooplankton
-!  mortality to small detritus (rate: ZooMR), zooplankton ingestion
-!  related excretion (rate: ZooER).
-!-----------------------------------------------------------------------
-!
-          cff1=dtdays*ZooBM(ng)
-          fac2=dtdays*ZooMR(ng)
-          fac3=dtdays*ZooER(ng)
-          DO k=1,N(ng)
-            DO i=Istr,Iend
-              fac1=fac3*Bio(i,k,iPhyt)*Bio(i,k,iPhyt)/                  &
-     &             (K_Phy(ng)+Bio(i,k,iPhyt)*Bio(i,k,iPhyt))
-              cff2=fac2*Bio(i,k,iZoop)
-              cff3=fac1*ZooAE_N(ng)
-              Bio(i,k,iZoop)=Bio(i,k,iZoop)/                            &
-     &                       (1.0_r8+cff2+cff3)
-!
-!  Zooplankton mortality and excretion.
-!
-              N_Flux_Zmortal=cff2*Bio(i,k,iZoop)
-              N_Flux_Zexcret=cff3*Bio(i,k,iZoop)
-              Bio(i,k,iNH4_)=Bio(i,k,iNH4_)+N_Flux_Zexcret
-#ifdef PO4
-              Bio(i,k,iPO4_)=Bio(i,k,iPO4_)+R_P2N(ng)*N_Flux_Zexcret
-#endif
-              Bio(i,k,iSDeN)=Bio(i,k,iSDeN)+N_Flux_Zmortal
-!
-!  Zooplankton basal metabolism (limited by a zooplankton minimum).
-!
-              N_Flux_Zmetabo=cff1*MAX(Bio(i,k,iZoop)-ZooMin(ng),0.0_r8)
-              Bio(i,k,iZoop)=Bio(i,k,iZoop)-N_Flux_Zmetabo
-              Bio(i,k,iNH4_)=Bio(i,k,iNH4_)+N_Flux_Zmetabo
-#ifdef PO4
-              Bio(i,k,iPO4_)=Bio(i,k,iPO4_)+R_P2N(ng)*N_Flux_Zmetabo
-#endif
-#ifdef OXYGEN
-              Bio(i,k,iOxyg)=Bio(i,k,iOxyg)-                            &
-     &                       rOxNH4*(N_Flux_Zmetabo+N_Flux_Zexcret)
-#endif
-#ifdef CARBON
-              Bio(i,k,iSDeC)=Bio(i,k,iSDeC)+                            &
-     &                       ZooCN(ng)*N_Flux_Zmortal
-              Bio(i,k,iTIC_)=Bio(i,k,iTIC_)+                            &
-     &                       ZooCN(ng)*(N_Flux_Zmetabo+N_Flux_Zexcret)
-#ifdef TALK_NONCONSERV
-              Bio(i,k,iTAlk)=Bio(i,k,iTAlk)+N_Flux_Zmetabo+             &
-     &                       N_Flux_Zexcret
-#endif
-#endif
-            END DO
-          END DO
-!
-!-----------------------------------------------------------------------
-!  Coagulation of phytoplankton and small detritus to large detritus.
-!-----------------------------------------------------------------------
-!
-          fac1=dtdays*CoagR(ng)
-          DO k=1,N(ng)
-            DO i=Istr,Iend
-              cff1=fac1*(Bio(i,k,iSDeN)+Bio(i,k,iPhyt))
-              cff2=1.0_r8/(1.0_r8+cff1)
-              Bio(i,k,iPhyt)=Bio(i,k,iPhyt)*cff2
-              Bio(i,k,iChlo)=Bio(i,k,iChlo)*cff2
-              Bio(i,k,iSDeN)=Bio(i,k,iSDeN)*cff2
-              N_Flux_CoagP=Bio(i,k,iPhyt)*cff1
-              N_Flux_CoagD=Bio(i,k,iSDeN)*cff1
-              Bio(i,k,iLDeN)=Bio(i,k,iLDeN)+                            &
-     &                       N_Flux_CoagP+N_Flux_CoagD
-#ifdef CARBON
-              Bio(i,k,iSDeC)=Bio(i,k,iSDeC)-PhyCN(ng)*N_Flux_CoagD
-              Bio(i,k,iLDeC)=Bio(i,k,iLDeC)+                            &
-     &                       PhyCN(ng)*(N_Flux_CoagP+N_Flux_CoagD)
-#endif
-            END DO
-          END DO
-!
-!-----------------------------------------------------------------------
-!  Detritus recycling to NH4, remineralization.
-!-----------------------------------------------------------------------
-!
-#ifdef OXYGEN
-          DO k=1,N(ng)
-            DO i=Istr,Iend
-              fac1=MAX(Bio(i,k,iOxyg)-6.0_r8,0.0_r8) ! O2 off max
-              fac2=MAX(fac1/(3.0_r8+fac1),0.0_r8) ! MM for O2 dependence
-              cff1=dtdays*SDeRRN(ng)*fac2
-              cff2=1.0_r8/(1.0_r8+cff1)
-              cff3=dtdays*LDeRRN(ng)*fac2
-              cff4=1.0_r8/(1.0_r8+cff3)
-              Bio(i,k,iSDeN)=Bio(i,k,iSDeN)*cff2
-              Bio(i,k,iLDeN)=Bio(i,k,iLDeN)*cff4
-              N_Flux_RemineS=Bio(i,k,iSDeN)*cff1
-              N_Flux_RemineL=Bio(i,k,iLDeN)*cff3
-              Bio(i,k,iNH4_)=Bio(i,k,iNH4_)+                            &
-     &                       N_Flux_RemineS+N_Flux_RemineL
-# ifdef PO4
-              Bio(i,k,iPO4_)=Bio(i,k,iPO4_)+R_P2N(ng)                   &
-     &                      *(N_Flux_RemineS+N_Flux_RemineL)
+            cff3=MIN(cff3,0.0_r8)
+            fac2=0.0_r8
+            IF ((z_w(i,j,k) .gt. cff3)) THEN
+               IF ((cff3 .lt. -5.0_r8)) THEN
+                  fac2=MAX(cff2,0.0_r8)/ABS(cff3)
+               END IF
+            END IF
+# else
+          fac2=7.7975857554_r8+0.3419993856_r8*(-z_r(i,j,k))+           &
+     &                          0.0034178070_r8*z_r(i,j,k)**2+          &
+     &                          0.0151537941_r8*Bio(i,k,itemp)**2
 # endif
-              Bio(i,k,iOxyg)=Bio(i,k,iOxyg)-                            &
-     &                       (N_Flux_RemineS+N_Flux_RemineL)*rOxNH4
-# if defined CARBON && defined TALK_NONCONSERV
-              Bio(i,k,iTAlk)=Bio(i,k,iTAlk)+N_Flux_RemineS+             &
-     &                       N_Flux_RemineL
-# endif
-# ifdef RIVER_DON
-              cff7=dtdays*RDeRRN(ng)*fac2
-              cff8=1.0_r8/(1.0_r8+cff7)
-              Bio(i,k,iRDeN)=Bio(i,k,iRDeN)*cff8
-              N_Flux_RemineR=Bio(i,k,iRDeN)*cff7
-              Bio(i,k,iNH4_)=Bio(i,k,iNH4_)+                            &
-     &                       N_Flux_RemineR
-#  ifdef PO4
-              Bio(i,k,iPO4_)=Bio(i,k,iPO4_)+R_P2N(ng)                   &
-     &                      *N_Flux_RemineR
-#  endif
-              Bio(i,k,iOxyg)=Bio(i,k,iOxyg)-N_Flux_RemineR*rOxNH4
-#  if defined CARBON && defined TALK_NONCONSERV
-              Bio(i,k,iTAlk)=Bio(i,k,iTAlk)+N_Flux_RemineR
-#  endif
-# endif
-            END DO
-          END DO
 #else
-          cff1=dtdays*SDeRRN(ng)
-          cff2=1.0_r8/(1.0_r8+cff1)
-          cff3=dtdays*LDeRRN(ng)
-          cff4=1.0_r8/(1.0_r8+cff3)
-# ifdef RIVER_DON
-          cff7=dtdays*RDeRRN(ng)
-          cff8=1.0_r8/(1.0_r8+cff7)
+          fac2=0.0_r8
+#endif
+!
+!-----------------------------------------------------------------------
+!  Primary production
+!-----------------------------------------------------------------------
+!
+          cff1=dtdays*MAX(fac2,0.0_r8)
+#ifdef OXYGEN
+              Bio(i,k,iOxyg)=Bio(i,k,iOxyg)+cff1
+#endif
+#ifdef CARBON
+              Bio(i,k,iTIC_)=Bio(i,k,iTIC_)-cff1
+#endif
+
+!
+!-----------------------------------------------------------------------
+! Water column respiration
+!-----------------------------------------------------------------------
+!
+#if defined  WOC_HRM23 || defined WOC_H2 || defined WOC_H3 || defined WOC_H23
+            IF ((z_w(i,j,0) .lt. -6.0_r8)) THEN
+# if defined WOC_HRM23
+              IF (((ng .eq. 1) .and. (i .lt. 51) .and. (j .gt. 247))    &
+     &                 .or. (ng .eq. 2)) THEN
+# elif defined WOC_H2
+              IF ((ng .eq. 1) .and. ((j .gt. 340) .or. ((i .gt. 135)    &
+     &                 .and. j .gt. 320 ))) THEN
+# elif defined WOC_H3
+              IF ((ng .eq. 1) .and. ((j .gt. 150) .or. ((i .gt. 50)     &
+     &                 .and. j .gt. 92 ))) THEN
+# elif defined WOC_H23
+              IF (((ng .eq. 1) .and. ((j .gt. 340) .or. ((i .gt. 135)   &
+     &                 .and. j .gt. 320 ))) .or.                        &
+                  ((ng .eq. 2) .and. ((j .gt. 150) .or. ((i .gt. 50)    &
+     &                 .and. j .gt. 92 )))) THEN
+# else
+              IF ((ng .eq. 0)) THEN
 # endif
-          DO k=1,N(ng)
-            DO i=Istr,Iend
-              Bio(i,k,iSDeN)=Bio(i,k,iSDeN)*cff2
-              Bio(i,k,iLDeN)=Bio(i,k,iLDeN)*cff4
-              N_Flux_RemineS=Bio(i,k,iSDeN)*cff1
-              N_Flux_RemineL=Bio(i,k,iLDeN)*cff3
-              Bio(i,k,iNH4_)=Bio(i,k,iNH4_)+                            &
-     &                       N_Flux_RemineS+N_Flux_RemineL
-# ifdef PO4
-              Bio(i,k,iPO4_)=Bio(i,k,iPO4_)+R_P2N(ng)                   &
-     &                      *(N_Flux_RemineS+N_Flux_RemineL)
+# if defined WOC_H2
+                IF ((j .lt. 390)) THEN
+# elif defined WOC_H3
+                IF ((j .lt. 302)) THEN
+# elif defined WOC_H23
+                IF (((ng .eq. 1) .and. (j .lt. 390)) .or.               &
+                        ((ng .eq. 2) .and. (j .lt. 302))) THEN
 # endif
-# if defined CARBON && defined TALK_NONCONSERV
-              Bio(i,k,iTAlk)=Bio(i,k,iTAlk)+N_Flux_RemineS+             &
-     &                       N_Flux_RemineL
+# ifdef OXYGEN
+              Bio(i,k,iOxyg)=Bio(i,k,iOxyg)-fac4
 # endif
-# ifdef RIVER_DON
-              Bio(i,k,iRDeN)=Bio(i,k,iRDeN)*cff8
-              N_Flux_RemineR=Bio(i,k,iRDeN)*cff7
-              Bio(i,k,iNH4_)=Bio(i,k,iNH4_)+N_Flux_RemineR
-#  ifdef PO4
-              Bio(i,k,iPO4_)=Bio(i,k,iPO4_)+R_P2N(ng)                   &
-     &                      *N_Flux_RemineR
+# ifdef CARBON
+              Bio(i,k,iTIC_)=Bio(i,k,iTIC_)+fac4
+#  ifdef TALK_NONCONSERV
+#   ifdef TALK_BGC
+              Bio(i,k,iTAlk)=Bio(i,k,iTAlk)+fac4*PhyNC(ng)
+#   endif
 #  endif
-#  if defined CARBON && defined TALK_NONCONSERV
-              Bio(i,k,iTAlk)=Bio(i,k,iTAlk)+N_Flux_RemineR
+# endif
+# if defined WOC_H2 || defined WOC_H3 || defined WOC_H23
+                END IF
+# endif
+              ELSE
+# ifdef OXYGEN
+              Bio(i,k,iOxyg)=Bio(i,k,iOxyg)-fac3
+# endif
+# ifdef CARBON
+              Bio(i,k,iTIC_)=Bio(i,k,iTIC_)+fac3
+#  ifdef TALK_NONCONSERV
+#   ifdef TALK_BGC
+              Bio(i,k,iTAlk)=Bio(i,k,iTAlk)+fac3*PhyNC(ng)
+#   endif
 #  endif
 # endif
+              END IF
+            END IF
+#else
+# ifdef OXYGEN
+              Bio(i,k,iOxyg)=Bio(i,k,iOxyg)-fac1
+# endif
+# ifdef CARBON
+              Bio(i,k,iTIC_)=Bio(i,k,iTIC_)+fac1
+#  ifdef TALK_NONCONSERV
+#   ifdef TALK_BGC
+              Bio(i,k,iTAlk)=Bio(i,k,iTAlk)+fac1*PhyNC(ng)
+#   endif
+#  endif
+# endif
+#endif
+
+#ifdef TALK_ADDITION
+!
+!-----------------------------------------------------------------------
+!  Compute dissolution of particles (Implicit formulation)
+!  dTAp_dt = -K*TAp
+!         dTA_dt =  K*TAp
+!-----------------------------------------------------------------------
+!
+               fac1=MAX(Bio(i,k,iTAp1),0.0_r8)
+               cff4=dtdays*dissTAp(1,ng)
+               IF (k.eq.1) THEN
+                 cff5=1.0_r8-sedloss(ng)
+               ELSE
+                 cff5=1.0_r8
+               END IF
+               Bio(i,k,iTAp1)=fac1/(1+cff4)
+               Bio(i,k,idTA)=Bio(i,k,idTA)+cff4*cff5*                   &
+     &                                     Bio(i,k,iTAp1)
+# ifdef TALK_DIAG_DISS
+               Bio(i,k,iTArm)=Bio(i,k,iTArm)+cff4*cff5*                 &
+     &                                       Bio(i,k,iTAp1)
+# endif
+# ifdef TALK_TWO_FEED
+               fac1=MAX(Bio(i,k,iTAp2),0.0_r8)
+               cff4=dtdays*dissTAp(2,ng)
+               Bio(i,k,iTAp2)=fac1/(1+cff4)
+               Bio(i,k,idTA)=Bio(i,k,idTA)+cff4*cff5*                   &
+     &                                     Bio(i,k,iTAp2)
+#  ifdef TALK_DIAG_DISS
+               Bio(i,k,iTArm)=Bio(i,k,iTArm)+cff4*cff5*                 &
+     &                                       Bio(i,k,iTAp2)
+#  endif
+# endif
+# ifdef TALK_THREE_FEED
+               fac1=MAX(Bio(i,k,iTAp2),0.0_r8)
+               cff4=dtdays*dissTAp(2,ng)
+               Bio(i,k,iTAp2)=fac1/(1+cff4)
+               Bio(i,k,idTA)=Bio(i,k,idTA)+cff4*cff5*                   &
+     &                                     Bio(i,k,iTAp2)
+#  ifdef TALK_DIAG_DISS
+               Bio(i,k,iTArm)=Bio(i,k,iTArm)+cff4*cff5*                 &
+     &                                       Bio(i,k,iTAp2)
+#  endif
+               fac1=MAX(Bio(i,k,iTAp3),0.0_r8)
+               cff4=dtdays*dissTAp(3,ng)
+               Bio(i,k,iTAp3)=fac1/(1+cff4)
+               Bio(i,k,idTA)=Bio(i,k,idTA)+cff4*cff5*                   &
+     &                                     Bio(i,k,iTAp3)
+#  ifdef TALK_DIAG_DISS
+               Bio(i,k,iTArm)=Bio(i,k,iTArm)+cff4*cff5*                 &
+     &                                       Bio(i,k,iTAp3)
+#  endif
+# endif
+!
+!-----------------------------------------------------------------------
+!  Compute external source of alkalinity (mol/second)
+!-----------------------------------------------------------------------
+!
+               cff1=0.0_r8
+               cff=0.0_r8
+# ifdef TALK_FILE
+! Add Alkalinity from river file
+              IF ((taflx(i,j).gt.0.0_r8)                                &
+#  if defined TALK_TWO_FEED
+     &          .and. (tatype(i,j).lt.3.0_r8)                           &
+#  elif !defined TALK_THREE_FEED
+     &          .and. (tatype(i,j).lt.2.0_r8)                           &
+#  endif
+     &          .and. (k.ge.takmin(i,j)) .and. (k.le.takmax(i,j))) THEN
+               cff=pm(i,j)*pn(i,j)
+               Hadd=SUM(Hz(i,j,takmin(i,j):takmax(i,j)))
+               cff1=taflx(i,j)
+# else
+! Alkalinity flux (constant) is defined in reduced_bgc.in
+              IF (i.eq.iloc_alkalinity(ng)                              &
+     &          .and. j.eq.jloc_alkalinity(ng)                          &
+     &          .and. k.ge.kloc_alkalinity_min(ng)                      &
+     &          .and. k.le.kloc_alkalinity_max(ng)                      &
+     &          .and. tdays(ng) .ge. alkalinity_startload(ng)           &
+     &          .and. tdays(ng) .le. alkalinity_endload(ng)) THEN
+                 cff=pm(i,j)*pn(i,j)
+                 cff1=alkalinity_load(ng)
+# endif
+               cff2=cff1*1000.0_r8*dtsec*cff/Hadd !*Hz(i,j,k)/Hadd
+# ifndef TALK_FILE
+               cff3=(1-P2Dratio(1,ng))*cff2
+               Bio(i,k,idTA)=Bio(i,k,idTA)+cff3
+               Bio(i,k,iTAp1)=Bio(i,k,iTAp1)+P2Dratio(1,ng)*cff2
+# else
+               cff3=(1-P2Dratio(INT(tatype(i,j)),ng))*cff2
+               Bio(i,k,idTA)=Bio(i,k,idTA)+cff3
+#  if defined TALK_TWO_FEED
+                IF (tatype(i,j).eq.1.0_r8) THEN
+               Bio(i,k,iTAp1)=Bio(i,k,iTAp1)+P2Dratio(1,ng)*cff2
+                ELSE IF (tatype(i,j).eq.2.0_r8) THEN
+               Bio(i,k,iTAp2)=Bio(i,k,iTAp2)+P2Dratio(2,ng)*cff2
+                END IF
+#  elif defined TALK_THREE_FEED
+                IF (tatype(i,j).eq.1.0_r8) THEN
+               Bio(i,k,iTAp1)=Bio(i,k,iTAp1)+P2Dratio(1,ng)*cff2
+                ELSE IF (tatype(i,j).eq.2.0_r8) THEN
+               Bio(i,k,iTAp2)=Bio(i,k,iTAp2)+P2Dratio(2,ng)*cff2
+                ELSE IF (tatype(i,j).eq.3.0_r8) THEN
+               Bio(i,k,iTAp3)=Bio(i,k,iTAp3)+P2Dratio(3,ng)*cff2
+                END IF
+#  else
+               Bio(i,k,iTAp1)=Bio(i,k,iTAp1)+P2Dratio(1,ng)*cff2
+#  endif
+# endif
+              END IF
+#endif
             END DO
           END DO
-#endif
 #ifdef OXYGEN
 !
 !-----------------------------------------------------------------------
@@ -1152,45 +1192,17 @@
 #endif
 
 #ifdef CARBON
-!
-!-----------------------------------------------------------------------
-!  Allow different remineralization rates for detrital C and detrital N.
-!-----------------------------------------------------------------------
-!
-          cff1=dtdays*SDeRRC(ng)
-          cff2=1.0_r8/(1.0_r8+cff1)
-          cff3=dtdays*LDeRRC(ng)
-          cff4=1.0_r8/(1.0_r8+cff3)
-# ifdef RIVER_DON
-          cff7=dtdays*RDeRRC(ng)
-          cff8=1.0_r8/(1.0_r8+cff7)
-# endif
           DO k=1,N(ng)
             DO i=Istr,Iend
-              Bio(i,k,iSDeC)=Bio(i,k,iSDeC)*cff2
-              Bio(i,k,iLDeC)=Bio(i,k,iLDeC)*cff4
-              C_Flux_RemineS=Bio(i,k,iSDeC)*cff1
-              C_Flux_RemineL=Bio(i,k,iLDeC)*cff3
-              Bio(i,k,iTIC_)=Bio(i,k,iTIC_)+                            &
-     &                       C_Flux_RemineS+C_Flux_RemineL
-# ifdef RIVER_DON
-              Bio(i,k,iRDeC)=Bio(i,k,iRDeC)*cff8
-              C_Flux_RemineR=Bio(i,k,iRDeC)*cff7
-              Bio(i,k,iTIC_)=Bio(i,k,iTIC_)+C_Flux_RemineR
-# endif
-            END DO
-          END DO
 # ifndef TALK_NONCONSERV
 !
 !  Alkalinity is treated as a diagnostic variable. TAlk = f(S[PSU])
-!  following Brewer et al. (1986).
 !
-          DO k=1,N(ng)
-            DO i=Istr,Iend
+!  Relationship from Brewer et al. (1986).
               Bio(i,k,iTAlk)=587.05_r8+50.56_r8*Bio(i,k,isalt)
+# endif
             END DO
           END DO
-# endif
 !
 !-----------------------------------------------------------------------
 !  Surface CO2 gas exchange.
@@ -1200,6 +1212,10 @@
 !  surface.
 !
           k=N(ng)
+          DO i=Istr,Iend  
+            pH(i,j)=pHc(i,j)  
+            pCO2(i)=pCO2c(i)  
+          END DO  
 # ifdef pCO2_RZ
           CALL pCO2_water_RZ (Istr, Iend, LBi, UBi, LBj, UBj,           &
      &                        IminS, ImaxS, j, DoNewton,                &
@@ -1209,15 +1225,57 @@
      &                        Bio(IminS:,k,itemp), Bio(IminS:,k,isalt), &
      &                        Bio(IminS:,k,iTIC_), Bio(IminS:,k,iTAlk), &
      &                        pH, pCO2)
+
+          DO i=Istr,Iend  
+            pHc(i,j)=pH(i,j)  
+            pCO2c(i)=pCO2(i)  
+          END DO
+
+#  if defined TALK_ADDITION
+          pH(IminS:,j)=pHa(IminS:,j)
+          pCO2(IminS:)=pCO2a(IminS:)
+          CALL pCO2_water_RZ (Istr, Iend, LBi, UBi, LBj, UBj,           &
+     &                        Istr, Iend, j, DoNewton,                &
+#   ifdef MASKING
+     &                        rmask,                                    &
+#   endif
+     &                        Bio(IminS:,k,itemp), Bio(IminS:,k,isalt), &
+     &                        Bio(IminS:,k,iTIC_)+Bio(IminS:,k,idTIC),  &
+     &                        Bio(IminS:,k,iTAlk)+Bio(IminS:,k,idTA),   &
+     &                        pH, pCO2)
+          pHa(IminS:,j)=pH(IminS:,j)
+          pCO2a(IminS:)=pCO2(IminS:)
+#  endif
 # else
           CALL pCO2_water (Istr, Iend, LBi, UBi, LBj, UBj,              &
-     &                     IminS, ImaxS, j, DoNewton,                   &
+     &                     Istr, Iend, j, DoNewton,                   &
 #  ifdef MASKING
      &                     rmask,                                       &
 #  endif
      &                     Bio(IminS:,k,itemp), Bio(IminS:,k,isalt),    &
      &                     Bio(IminS:,k,iTIC_), Bio(IminS:,k,iTAlk),    &
      &                     0.0_r8, 0.0_r8, pH, pCO2)
+
+          DO i=Istr,Iend  
+            pHc(i,j)=pH(i,j)  
+            pCO2c(i)=pCO2(i)  
+          END DO
+
+#  if defined TALK_ADDITION
+          pH(IminS:,j)=pHa(IminS:,j)
+          pCO2(IminS:)=pCO2a(IminS:)
+          CALL pCO2_water (Istr, Iend, LBi, UBi, LBj, UBj,              &
+     &                     IminS, ImaxS, j, DoNewton,                   &
+#  ifdef MASKING
+     &                     rmask,                                       &
+#  endif
+     &                     Bio(IminS:,k,itemp), Bio(IminS:,k,isalt),    &
+     &                     Bio(IminS:,k,iTIC_)+Bio(IminS:,k,idTIC),     &
+     &                     Bio(IminS:,k,iTAlk)+Bio(IminS:,k,idTA),      &
+     &                     0.0_r8, 0.0_r8, pH, pCO2)
+          pHa(IminS:,j)=pH(IminS:,j)
+          pCO2a(IminS:)=pCO2(IminS:)
+#  endif
 # endif
 !
 !  Compute surface CO2 gas exchange.
@@ -1258,34 +1316,175 @@
 # if defined PCO2AIR_DATA
             pCO2air_secular=380.464_r8+9.321_r8*SIN(pi2*yday/365.25_r8+ &
      &                      1.068_r8)
-            CO2_Flux=cff3*CO2_sol*(pCO2air_secular-pCO2(i))
-# elif defined PCO2AIR_SECULAR
-            pCO2air_secular=D0+D1*pmonth*12.0_r8+                       &
-     &                         D2*SIN(pi2*pmonth+D3)+                   &
-     &                         D4*SIN(pi2*pmonth+D5)+                   &
-     &                         D6*SIN(pi2*pmonth+D7)
-            CO2_Flux=cff3*CO2_sol*(pCO2air_secular-pCO2(i))
+            CO2c_Flx=cff3*CO2_sol*(pCO2air_secular-pCO2c(i))
+#   if defined TALK_ADDITION
+            CO2a_Flx=cff3*CO2_sol*(pCO2air_secular-pCO2a(i))
+#   endif
+# elif defined PCO2AIR_MAUNALOA
+            fyear=year+MIN((yday-1.0_r8)/365.0_r8,1.0_r8)
+            pCO2air_secular=D0*SIN(pi2*(fyear-D1)/D2)+                  &
+     &                      D3*SIN(pi2*(fyear-D4)/D5)+                  &
+     &                      D6*SIN(pi2*(fyear-D7)/D8)+                  &
+     &                      D9*fyear**2+D10*fyear+D11
+            CO2c_Flx=cff3*CO2_sol*(pCO2air_secular-pCO2c(i))
+#   if defined TALK_ADDITION
+            CO2a_Flx=cff3*CO2_sol*(pCO2air_secular-pCO2a(i))
+#   endif
+# elif defined PCO2AIR_SABLEISLAND
+            fyear=year+MIN((yday-1.0_r8)/365.0_r8,1.0_r8)
+            pCO2air_secular=D0+D1*fyear+D2*fyear**2+                    &
+     &                      D3*1.25_r8*LOG(SIN(pi2*fyear+D4)+D5)
+            CO2c_Flx=cff3*CO2_sol*(pCO2air_secular-pCO2c(i))
+#   if defined TALK_ADDITION
+            CO2a_Flx=cff3*CO2_sol*(pCO2air_secular-pCO2a(i))
+#   endif
 # else
-            CO2_Flux=cff3*CO2_sol*(pCO2air(ng)-pCO2(i))
+            CO2c_Flx=cff3*CO2_sol*(pCO2air(ng)-pCO2c(i))
+#   if defined TALK_ADDITION
+            CO2a_Flx=cff3*CO2_sol*(pCO2air(ng)-pCO2a(i))
+#   endif
 # endif
             Bio(i,k,iTIC_)=Bio(i,k,iTIC_)+                              &
-     &                     CO2_Flux*Hz_inv(i,k)
+     &                     CO2c_Flx*Hz_inv(i,k)
 # ifdef DIAGNOSTICS_BIO
-            DiaBio2d(i,j,iCOfx)=DiaBio2d(i,j,iCOfx)+                    &
+            DiaBio2d(i,j,iCfxc)=DiaBio2d(i,j,iCfxc)+                    &
 #  ifdef WET_DRY
      &                          rmask_full(i,j)*                        &
 #  endif
-     &                          CO2_Flux*fiter
-            DiaBio2d(i,j,ipCO2)=pCO2(i)
+     &                          CO2c_Flx*fiter
+            DiaBio2d(i,j,ipCO2c)=pCO2c(i)
 #  ifdef WET_DRY
-            DiaBio2d(i,j,ipCO2)=DiaBio2d(i,j,ipCO2)*rmask_full(i,j)
+            DiaBio2d(i,j,ipCO2c)=DiaBio2d(i,j,ipCO2c)*rmask_full(i,j)
 #  endif
+# endif
+# if defined TALK_ADDITION
+            Bio(i,k,idTIC)=Bio(i,k,idTIC)+                              &
+     &                     (CO2a_Flx-CO2c_Flx)*Hz_inv(i,k)
+#   ifdef DIAGNOSTICS_BIO
+            DiaBio2d(i,j,iCfxa)=DiaBio2d(i,j,iCfxa)+                    &
+#    ifdef WET_DRY
+     &                          rmask_full(i,j)*                        &
+#    endif
+     &                          CO2a_Flx*fiter
+            DiaBio2d(i,j,ipCO2a)=pCO2a(i)
+#    ifdef WET_DRY
+            DiaBio2d(i,j,ipCO2a)=DiaBio2d(i,j,ipCO2a)*rmask_full(i,j)
+#    endif
+#   endif
 # endif
           END DO
 #endif
 !
+! Sediment respiration imposed at bottom
+!
+          DO i=Istr,Iend
+            cff5=ABS(z_w(i,j,0))
+#if defined SOC_HRM23 || defined SOC_H2 || defined SOC_H23
+# if defined SOC_HRM23
+            IF (((ng .eq. 1) .and. (i .lt. 51) .and. (j .gt. 247))      &
+     &               .or. (ng .eq. 2)) THEN
+# elif defined SOC_H2
+            IF (((ng .eq. 1) .and. ((j .gt. 340) .or. ((i .gt. 135)     &
+     &              .and. j .gt. 320 ))) .and. (j .lt. 390)) THEN
+# elif defined SOC_H3
+            IF (((ng .eq. 1) .and. ((j .gt. 150) .or. ((i .gt. 50)      &
+     &                 .and. j .gt. 92 )) .and. (j .lt. 302))) THEN
+# elif defined SOC_H23
+            IF (((ng .eq. 1) .and. ((j .gt. 340) .or. ((i .gt. 135)     &
+     &               .and. j .gt. 320 )) .and. (j .lt. 390)) .or.       &
+                ((ng .eq. 2) .and. ((j .gt. 150) .or. ((i .gt. 50)      &
+     &               .and. j .gt. 92 )) .and. (j .lt. 302))) THEN
+# else
+            IF ((ng .eq. 0)) THEN
+# endif
+# ifdef SOC_ZVAR
+!             Based on DIC vs depth relationship from Chris Algar
+              cff2=3.37_r8*EXP(0.033*cff5)*1.0_r8 ! warning, multiplier
+              cff1=cff2*Hz_inv(i,1)*dtdays
+# else
+              cff1=SOC(ng)*Hz_inv(i,1)*dtdays
+# endif
+!               cff1=100_r8*Hz_inv(i,1)*dtdays
+# if defined SOC_H2
+            ELSEIF ((j .lt. 390)) THEN
+# elif defined SOC_H3
+            ELSEIF ((j .lt. 302)) THEN
+# elif defined SOC_H23
+            ELSEIF (((ng .eq. 1) .and. (j .lt. 390)) .or.               &
+                    ((ng .eq. 2) .and. (j .lt. 302))) THEN
+# else
+            ELSE
+# endif
+              cff2=SOC0*cff5+SOC1*cff5**2+SOC2*cff5**3+SOC3*            &
+     &             lonr(i,j)+SOC4*latr(i,j)+SOC5*Bio(i,1,isalt)+        &
+     &             SOC6*Bio(i,1,isalt)**2+SOC7*Bio(i,1,isalt)**3+       &
+     &             SOC8*Bio(i,1,itemp)+SOC9*Bio(i,1,itemp)**2+          &
+     &             SOC10*Bio(i,1,itemp)**3+SOC11*Bio(i,N(ng),isalt)+    &
+     &             SOC12*Bio(i,N(ng),isalt)**2+SOC13*                   &
+     &             Bio(i,N(ng),isalt)**3+SOC14*Bio(i,N(ng),itemp)+      &
+     &             SOC15*Bio(i,N(ng),itemp)**2+SOC16*                   &
+     &             Bio(i,N(ng),itemp)**3+SOC17
+                   cff2=MIN(MAX(cff2,0.0_r8),30.0_r8)
+              cff1=cff2*Hz_inv(i,1)*dtdays
+# if defined SOC_H2 || defined SOC_H3 || defined SOC_H23
+            ELSE
+              cff1=0.0_r8
+# endif
+            END IF
+#elif defined SOC_NWA
+            IF ((latr(i,j) .ge. 53.45_r8) .or.                          &
+     &            ((latr(i,j) .ge. 50_r8) .and.                         &
+     &            (lonr(i,j) .le. -76_r8))) THEN    ! Northern area
+                IF ((cff5 .lt. 200_r8)) THEN        ! Shef area
+                  cff2=(SOC0(1)+SOC0(2)*latr(i,j)+SOC0(3)*lonr(i,j)+    &
+     &                SOC0(4)*cff5+SOC0(5)*fac6+SOC0(6)*fac7)*115/12
+                ELSEIF ((cff5 .lt. 3000_r8)) THEN   ! Slope area
+                  cff2=(SOC1(1)+SOC1(2)*latr(i,j)+SOC1(3)*lonr(i,j)+    &
+     &                SOC1(4)*cff5+SOC1(5)*fac6+SOC1(6)*fac7)*115/12
+                ELSE                                ! Deep area
+                  cff2=0.02_r8
+                END IF
+            ELSE                   ! Southern area
+                IF ((cff5 .lt. 200_r8)) THEN        ! Shef area
+                  cff2=(SOC2(1)+SOC2(2)*latr(i,j)+SOC2(3)*lonr(i,j)+    &
+     &                SOC2(4)*cff5+SOC2(5)*fac6+SOC2(6)*fac7)*115/12
+                ELSEIF ((cff5 .lt. 3000_r8)) THEN   ! Slope area
+                   cff2=(SOC3(1)+SOC3(2)*latr(i,j)+SOC3(3)*lonr(i,j)+   &
+     &                 SOC3(4)*cff5+SOC3(5)*fac6+SOC3(6)*fac7)*115/12
+                ELSE                                ! Deep area
+                    cff2=0.02_r8
+                END IF
+            END IF
+            cff1=cff2*Hz_inv(i,1)*dtdays
+#else
+#ifdef SOC_ZVAR
+            cff2=3.37_r8*EXP(0.033*cff5)*1.0_r8 ! warning, multiplier
+            cff1=cff2*Hz_inv(i,1)*dtdays
+# else
+            cff1=SOC(ng)*Hz_inv(i,1)*dtdays
+# endif
+#endif
+#ifdef OXYGEN
+# ifdef SOC_OXYDEP
+            Bio(i,1,iOxyg)=Bio(i,1,iOxyg)-cff1*(1.0_r8-                 &
+     &                     EXP(-MAX(Bio(i,1,iOxyg),0.0_r8)/30.0_r8))
+# else
+            Bio(i,1,iOxyg)=Bio(i,1,iOxyg)-cff1
+# endif
+#endif
+#ifdef CARBON
+            Bio(i,1,iTIC_)=Bio(i,1,iTIC_)+cff1
+# ifdef TALK_NONCONSERV
+#  ifdef TALK_BGC
+            Bio(i,1,iTAlk)=Bio(i,1,iTAlk)+cff1*0.036_r8
+#  endif
+# endif
+#endif
+          END DO
+#ifdef TALK_ADDITION
+!
 !-----------------------------------------------------------------------
-!  Vertical sinking terms.
+!  Vertical sinking terms: particles
 !-----------------------------------------------------------------------
 !
 !  Reconstruct vertical profile of selected biological constituents
@@ -1462,75 +1661,32 @@
               END DO
             END DO
 
-#ifdef BIO_SEDIMENT
 !
-!  Particulate flux reaching the seafloor is remineralized and returned
-!  to the dissolved nitrate pool. Without this conversion, particulate
-!  material falls out of the system. This is a temporary fix to restore
-!  total nitrogen conservation. It will be replaced later by a
-!  parameterization that includes the time delay of remineralization
-!  and dissolved oxygen.
+!  Particles reaching the seafloor stay at the bottom. Without this
+!  module, particles falls out of the system. 
 !
-            cff2=4.0_r8/16.0_r8
-# ifdef OXYGEN
-            cff3=115.0_r8/16.0_r8
-            cff4=106.0_r8/16.0_r8
-# endif
-            IF ((ibio.eq.iPhyt).or.                                     &
-     &          (ibio.eq.iSDeN).or.                                     &
-     &          (ibio.eq.iLDeN)) THEN
+            IF (ibio.eq.iTAp1) THEN
               DO i=Istr,Iend
                 cff1=FC(i,0)*Hz_inv(i,1)
-# ifdef DENITRIFICATION
-                Bio(i,1,iNH4_)=Bio(i,1,iNH4_)+cff1*cff2
-#  ifdef DIAGNOSTICS_BIO
-                DiaBio2d(i,j,iDNIT)=DiaBio2d(i,j,iDNIT)+                &
-#   ifdef WET_DRY
-     &                              rmask_full(i,j)*                    &
-#   endif
-     &                              (1.0_r8-cff2)*cff1*Hz(i,j,1)*fiter
-#  endif
-#  ifdef PO4
-                Bio(i,1,iPO4_)=Bio(i,1,iPO4_)+cff1*R_P2N(ng)
-#  endif
-#  ifdef OXYGEN
-                Bio(i,1,iOxyg)=Bio(i,1,iOxyg)-cff1*cff3
-#  endif
-# else
-                Bio(i,1,iNH4_)=Bio(i,1,iNH4_)+cff1
-#   ifdef PO4
-                Bio(i,1,iPO4_)=Bio(i,1,iPO4_)+cff1*R_P2N(ng)
-#   endif
-#  ifdef OXYGEN
-                Bio(i,1,iOxyg)=Bio(i,1,iOxyg)-cff1*cff4
-#  endif
-#  if defined CARBON && defined TALK_NONCONSERV
-                Bio(i,1,iTAlk)=Bio(i,1,iTAlk)+cff1
-#  endif
-# endif
+                Bio(i,1,iTAp1)=Bio(i,1,iTAp1)+cff1
               END DO
-            END IF
-# ifdef CARBON
-#  ifdef DENITRIFICATION
-            cff3=12.0_r8
-            cff4=0.74_r8
-#  endif
-            IF ((ibio.eq.iSDeC).or.                                     &
-     &          (ibio.eq.iLDeC))THEN
+# if defined TALK_TWO_FEED || defined TALK_THREE_FEED
+            ELSE IF (ibio.eq.iTAp2) THEN
               DO i=Istr,Iend
                 cff1=FC(i,0)*Hz_inv(i,1)
-                Bio(i,1,iTIC_)=Bio(i,1,iTIC_)+cff1
+                Bio(i,1,iTAp2)=Bio(i,1,iTAp2)+cff1
               END DO
-            END IF
-            IF (ibio.eq.iPhyt)THEN
+# endif
+# if defined TALK_THREE_FEED
+            ELSE IF (ibio.eq.iTAp3) THEN
               DO i=Istr,Iend
                 cff1=FC(i,0)*Hz_inv(i,1)
-                Bio(i,1,iTIC_)=Bio(i,1,iTIC_)+cff1*PhyCN(ng)
+                Bio(i,1,iTAp3)=Bio(i,1,iTAp3)+cff1
               END DO
-            END IF
 # endif
-#endif
+            END IF
           END DO SINK_LOOP
+#endif
         END DO ITER_LOOP
 !
 !-----------------------------------------------------------------------
@@ -1575,7 +1731,7 @@
       END DO J_LOOP
 !
       RETURN
-      END SUBROUTINE fennel_tile
+      END SUBROUTINE biology_tile
 
 #ifdef CARBON
 # ifdef pCO2_RZ
@@ -1643,16 +1799,16 @@
       integer,  intent(in) :: LBi, UBi, LBj, UBj, IminS, ImaxS
       integer,  intent(in) :: Istr, Iend, j, DoNewton
 !
-#  ifdef ASSUMED_SHAPE
-#   ifdef MASKING
-      real(r8), intent(in) :: rmask(LBi:,LBj:)
-#   endif
-      real(r8), intent(in) :: T(IminS:)
-      real(r8), intent(in) :: S(IminS:)
-      real(r8), intent(in) :: TIC(IminS:)
-      real(r8), intent(in) :: TAlk(IminS:)
-      real(r8), intent(inout) :: pH(LBi:,LBj:)
-#  else
+!#  ifdef ASSUMED_SHAPE
+!#   ifdef MASKING
+!      real(r8), intent(in) :: rmask(LBi:,LBj:)
+!#   endif
+!      real(r8), intent(in) :: T(IminS:)
+!      real(r8), intent(in) :: S(IminS:)
+!      real(r8), intent(in) :: TIC(IminS:)
+!      real(r8), intent(in) :: TAlk(IminS:)
+!      real(r8), intent(inout) :: pH(LBi:,LBj:)
+!#  else
 #   ifdef MASKING
       real(r8), intent(in) :: rmask(LBi:UBi,LBj:UBj)
 #   endif
@@ -1661,7 +1817,7 @@
       real(r8), intent(in) :: TIC(IminS:ImaxS)
       real(r8), intent(in) :: TAlk(IminS:ImaxS)
       real(r8), intent(inout) :: pH(LBi:UBi,LBj:UBj)
-#  endif
+!#  endif
 
       real(r8), intent(out) :: pCO2(IminS:ImaxS)
 !
@@ -1971,16 +2127,16 @@
       integer,  intent(in) :: LBi, UBi, LBj, UBj, IminS, ImaxS
       integer,  intent(in) :: Istr, Iend, j, DoNewton
 !
-#  ifdef ASSUMED_SHAPE
-#   ifdef MASKING
-      real(r8), intent(in) :: rmask(LBi:,LBj:)
-#   endif
-      real(r8), intent(in) :: T(IminS:)
-      real(r8), intent(in) :: S(IminS:)
-      real(r8), intent(in) :: TIC(IminS:)
-      real(r8), intent(in) :: TAlk(IminS:)
-      real(r8), intent(inout) :: pH(LBi:,LBj:)
-#  else
+!#  ifdef ASSUMED_SHAPE
+!#   ifdef MASKING
+!      real(r8), intent(in) :: rmask(LBi:,LBj:)
+!#   endif
+!      real(r8), intent(in) :: T(IminS:)
+!      real(r8), intent(in) :: S(IminS:)
+!      real(r8), intent(in) :: TIC(IminS:)
+!      real(r8), intent(in) :: TAlk(IminS:)
+!      real(r8), intent(inout) :: pH(LBi:,LBj:)
+!#  else
 #   ifdef MASKING
       real(r8), intent(in) :: rmask(LBi:UBi,LBj:UBj)
 #   endif
@@ -1989,7 +2145,7 @@
       real(r8), intent(in) :: TIC(IminS:ImaxS)
       real(r8), intent(in) :: TAlk(IminS:ImaxS)
       real(r8), intent(inout) :: pH(LBi:UBi,LBj:UBj)
-#  endif
+!#  endif
       real(r8), intent(in) :: PO4b
       real(r8), intent(in) :: SiO3
 

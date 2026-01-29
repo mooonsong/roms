@@ -1264,6 +1264,35 @@
       END IF
 #   endif
 #  endif
+
+! ----- added by siyu 2026-01-26 -----
+#  if defined TALK_ADDITION && defined TALK_FILE
+!
+!  Write out alkalinity addition.
+!
+      IF (Aout(idAtrc,ng)) THEN
+        scale=1.0_r8
+        gtype=gfactor*r2dvar
+        status=nf_fwrite2d(ng, iNLM, AVG(ng)%ncid,                      &
+     &                     AVG(ng)%Vid(idAtrc),                         &
+     &                     AVG(ng)%Rindex, gtype,                       &
+     &                     LBi, UBi, LBj, UBj, scale,                   &
+#   ifdef MASKING
+     &                     GRID(ng) % rmask,                            &
+#   endif
+     &                     AVERAGE(ng) % avgTAflx)
+        IF (FoundError(status, nf90_noerr, __LINE__, MyFile)) THEN
+          IF (Master) THEN
+            WRITE (stdout,10) TRIM(Vname(1,idAtrc)), AVG(ng)%Rindex
+          END IF
+          exit_flag=3
+          ioerror=status
+          RETURN
+        END IF
+      END IF
+#  endif
+! ----- addition end ----------------------
+
 #  if defined BULK_FLUXES || defined ECOSIM || defined ATM_PRESS
 !
 !  Write out surface air pressure.

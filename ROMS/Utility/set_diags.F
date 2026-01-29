@@ -490,9 +490,17 @@
         END DO
 # endif
 # ifdef DIAGNOSTICS_BIO
-#  if defined BIO_FENNEL || defined ECB || defined HYPOXIA_SRM
+#  if defined BIO_FENNEL || defined ECB || defined HYPOXIA_SRM || defined REDUCED_BGC
         DO idiag=1,NDbio2d
+#   ifdef REDUCED_BGC
+#    ifdef TALK_ADDITION
+          IF ((idiag.ne.ipCO2c).and.(idiag.ne.ipCO2a)) THEN
+#    else
+          IF (idiag.ne.ipCO2c) THEN
+#    endif
+#   else
           IF (idiag.ne.ipCO2) THEN
+#   endif
             DO j=JstrR,JendR
               DO i=IstrR,IendR
                 DIAGS(ng)%DiaBio2d(i,j,idiag)=rfac(i,j)*                &
@@ -657,7 +665,7 @@
 #   endif
 #  endif
 #  ifdef DIAGNOSTICS_BIO
-#   if defined BIO_FENNEL || defined ECB || defined HYPOXIA_SRM
+#   if defined BIO_FENNEL || defined ECB || defined HYPOXIA_SRM || defined REDUCED_BGC
 !
 !  Biological terms 2D diagnostics.
 !

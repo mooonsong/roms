@@ -281,6 +281,14 @@
       integer  :: idRdir        ! river runoff direction
       integer  :: idRepo        ! river runoff ETA-positions
       integer  :: idRflg        ! river runoff flag
+! ----- added by siyu 2026-01-26 -----
+#if defined TALK_ADDITION && defined TALK_FILE
+        integer  :: idAtrc       ! alkalinity addition rate
+        integer  :: idtype       ! feedstock type
+        integer  :: idkmin       ! minimum s-level for addition
+        integer  :: idkmax       ! maximum s-level for addition
+#endif
+! ----- addition end -----
       integer  :: idRtra        ! river runoff mass transport
       integer  :: idRuct        ! RHS of U-momentum coupling term
       integer  :: idRu2d        ! RHS of 2D U-momentum
@@ -2117,6 +2125,19 @@
             id3dPV=varid
           CASE ('id3dRV')
             id3dRV=varid
+! ----- added by siyu 2026-01-26 -----
+#if defined TALK_ADDITION && defined TALK_FILE
+            CASE ('idAtrc')
+              idAtrc=varid
+            CASE ('idtype')
+              idtype=varid
+            CASE ('idkmin')
+              idkmin=varid
+            CASE ('idkmax')
+              idkmax=varid
+#endif
+! ----- addition end -----
+
 #ifdef DIAGNOSTICS_UV
           CASE ('idDu2d(M2pgrd)')
             idDu2d(M2pgrd)=varid
@@ -2449,6 +2470,10 @@
 #  include <npzd_iron_var.h>
 # elif defined RED_TIDE
 #  include <red_tide_var.h>
+! ---- added by siyu 2026-01-26 ---------
+# elif defined REDUCED_BGC
+#  include <reduced_bgc_var.h>
+! ---- modification end
 # endif
 #endif
 
@@ -2992,11 +3017,12 @@
 #if defined SOLVE3D && (defined AVERAGES || defined AD_AVERAGES)
 !
 !  Determine metadata for quadratic tracer averages.
-!
+! 
           SELECT CASE (Vinfo(1))
             CASE ('tracer2')
               varid=varid-1
               DO i=1,MT
+!                WRITE(*,*) 'Debug: i=', i, ' Variable: ', TRIM(Vname(1,idTvar(i))) 
                 varid=varid+1
                 idTTav(i)=varid
                 DO ng=1,Ngrids

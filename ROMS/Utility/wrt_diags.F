@@ -314,7 +314,7 @@
       END DO
 # endif
 # ifdef DIAGNOSTICS_BIO
-#  if defined BIO_FENNEL || defined ECB || defined HYPOXIA_SRM
+#  if defined BIO_FENNEL || defined ECB || defined HYPOXIA_SRM || defined REDUCED_BGC
 !
 !  Write out 2D biological diagnostic fields.
 !
@@ -323,7 +323,15 @@
       DO ivar=1,NDbio2d
         ifield=iDbio2(ivar)
         IF (Dout(ifield,ng)) THEN
+#   ifdef REDUCED_BGC
+#    ifdef TALK_ADDITION
+          IF ((ivar.eq.ipCO2c).or.(ivar.eq.ipCO2a)) THEN
+#    else
+          IF (ivar.eq.ipCO2c) THEN
+#    endif
+#   else
           IF (ivar.eq.ipCO2) THEN
+#   endif
             scale=1.0_dp
           ELSE
             scale=1.0_dp/dtBIO                       ! mmole m-2 day-1

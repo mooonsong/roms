@@ -120,6 +120,18 @@
 !  rainG        Latest two-time snapshots of input "rain" grided       !
 !                 data used for interpolation.                         !
 !                                                                      !
+!  added by siyu 2026-01-26 -------------------------------------------!
+#if defined TALK_ADDITION && defined TALK_FILE
+!  taflx       Alkalinity addition flux                                !
+!  taflxG      Latest two-time snapshots of alkalinity addition flux   !
+!  tatype      Feedstock type [0-3]                                    !
+!  tatypeG     Latest two-time snapshots of feedstock type             !
+!  takmin      Minimum s-level for alkalinity release                  !
+!  takminG     Latest two-time snapshots of minimum s-level            !
+!  takmax      Maximum s-level for alkalinity release (takmin<takmax)  !
+!  takmaxG     Latest two-time snapshots of maximum s-level            !
+#endif
+!  ----- addition end  ------------------------------------------------!
 !  Surface tracer fluxes.                                              !
 !                                                                      !
 !  stflux       Forcing surface flux of tracer type variables from     !
@@ -422,6 +434,18 @@
           real(r8), pointer :: snow(:,:)
 # endif
 
+!  ----- added by siyu 2026-01-26 -----------------
+#if defined TALK_ADDITION && defined TALK_FILE
+          real(r8), pointer :: taflx(:,:)
+          real(r8), pointer :: taflxG(:,:,:)
+          real(r8), pointer :: tatype(:,:)
+          real(r8), pointer :: tatypeG(:,:,:)
+          real(r8), pointer :: takmin(:,:)
+          real(r8), pointer :: takminG(:,:,:)
+          real(r8), pointer :: takmax(:,:)
+          real(r8), pointer :: takmaxG(:,:,:)
+#endif
+!  ----- addition end -----------------------------
           real(r8), pointer :: stflux(:,:,:)
 # if !defined ANA_STFLUX || !defined ANA_SSFLUX || \
      !defined ANA_SPFLUX
@@ -916,6 +940,18 @@
       Dmem(ng)=Dmem(ng)+size2d
 # endif
 
+!  -----  added by siyu 2026-01-26  ------------------------
+#if defined TALK_ADDITION && defined TALK_FILE
+      allocate ( FORCES(ng) % taflx(LBi:UBi,LBj:UBj) )
+      allocate ( FORCES(ng) % taflxG(LBi:UBi,LBj:UBj,2) )
+      allocate ( FORCES(ng) % tatype(LBi:UBi,LBj:UBj) )
+      allocate ( FORCES(ng) % tatypeG(LBi:UBi,LBj:UBj,2) )
+      allocate ( FORCES(ng) % takmin(LBi:UBi,LBj:UBj) )
+      allocate ( FORCES(ng) % takminG(LBi:UBi,LBj:UBj,2) )
+      allocate ( FORCES(ng) % takmax(LBi:UBi,LBj:UBj) )
+      allocate ( FORCES(ng) % takmaxG(LBi:UBi,LBj:UBj,2) )
+#endif
+!  ----- addition end  --------------------------------------
       allocate ( FORCES(ng) % stflux(LBi:UBi,LBj:UBj,NT(ng)) )
       Dmem(ng)=Dmem(ng)+REAL(NT(ng),r8)*size2d
 
@@ -2020,6 +2056,22 @@
             FORCES(ng) % evap(i,j) = IniVal
 #  endif
 # endif
+!  -----  added by siyu 
+#if defined TALK_ADDITION && defined TALK_FILE
+            FORCES(ng) % taflx(i,j) = IniVal
+            FORCES(ng) % taflxG(i,j,1) = IniVal
+            FORCES(ng) % taflxG(i,j,2) = IniVal
+            FORCES(ng) % tatype(i,j) = IniVal
+            FORCES(ng) % tatypeG(i,j,1) = IniVal
+            FORCES(ng) % tatypeG(i,j,2) = IniVal
+            FORCES(ng) % takmin(i,j) = IniVal
+            FORCES(ng) % takminG(i,j,1) = IniVal
+            FORCES(ng) % takminG(i,j,2) = IniVal
+            FORCES(ng) % takmax(i,j) = IniVal
+            FORCES(ng) % takmaxG(i,j,1) = IniVal
+            FORCES(ng) % takmaxG(i,j,2) = IniVal
+#endif
+!  ----- addition end 
 # if defined ICE_MODEL       && \
      defined ICE_BULK_FLUXES && defined BULK_FLUXES
             FORCES(ng) % Qnet_ai(i,j) = IniVal

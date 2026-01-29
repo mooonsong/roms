@@ -1416,6 +1416,29 @@
         END IF
 #   endif
 #  endif
+! ----- added by siyu 2026-01-26 -----
+#  if defined TALK_ADDITION && defined TALK_FILE
+!
+!  Define alkalinity addition.
+!
+        IF (Aout(idAtrc,ng)) THEN
+          Vinfo( 1)=Vname(1,idAtrc)
+          WRITE (Vinfo( 2),'(a,1x,a)') Prefix, TRIM(Vname(2,idAtrc))
+          Vinfo( 3)=Vname(3,idAtrc)
+          Vinfo(14)=Vname(4,idAtrc)
+          Vinfo(16)=Vname(1,idtime)
+#   if defined WRITE_WATER && defined MASKING
+          Vinfo(20)='mask_rho'
+#   endif
+          Vinfo(22)='coordinates'
+          Aval(5)=REAL(Iinfo(1,idAtrc,ng),r8)
+          status=def_var(ng, iNLM, AVG(ng)%ncid, AVG(ng)%Vid(idAtrc), &
+     &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname)
+          IF (FoundError(exit_flag, NoError, __LINE__,                  &
+     &                   __FILE__)) RETURN
+        END IF
+#  endif
+! ----- addition end -----
 #  if defined BULK_FLUXES || defined ECOSIM || defined ATM_PRESS
 !
 !  Define surface air pressure.
@@ -2034,6 +2057,13 @@
             AVG(ng)%Vid(idSdif)=var_id(i)
 #   endif
 #  endif
+! ----- added by siyu 2026-01-26 -----
+# if defined TALK_ADDITION && defined TALK_FILE
+          ELSE IF (TRIM(var_name(i)).eq.TRIM(Vname(1,idAtrc))) THEN
+            got_var(idAtrc)=.TRUE.
+            AVG(ng)%Vid(idAtrc)=var_id(i)
+# endif
+! ----- addition end -----
 #  if defined BULK_FLUXES || defined ECOSIM || defined ATM_PRESS
           ELSE IF (TRIM(var_name(i)).eq.TRIM(Vname(1,idPair))) THEN
             got_var(idPair)=.TRUE.
@@ -2434,6 +2464,16 @@
         END IF
 #   endif
 #  endif
+! ----- added by siyu 2026-01-26 -----
+# if defined TALK_ADDITION && defined TALK_FILE
+        IF (.not.got_var(idAtrc).and.Aout(idAtrc,ng)) THEN
+          IF (Master) WRITE (stdout,60) TRIM(Vname(1,idAtrc)),          &
+     &                                  TRIM(ncname)
+          exit_flag=3
+          RETURN
+        END IF
+# endif
+! ----- addition end -----
 #  if defined BULK_FLUXES || defined ECOSIM || defined ATM_PRESS
         IF (.not.got_var(idPair).and.Aout(idPair,ng)) THEN
           IF (Master) WRITE (stdout,60) TRIM(Vname(1,idPair)),          &

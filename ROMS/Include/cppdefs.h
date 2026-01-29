@@ -483,6 +483,35 @@
 ** SANDS_PROXY_ISS         if sands as a proxy to ISS in light attenuation   **
 ** TALK_NONCONSERV         if nonconservative computation of alkalinity      **
 **                                                                           **
+** Reduced BGC model (Laurent et al., 2025) OPTIONS:                         **
+**                                                                           **
+** REDUCED_BGC             if Simple Reduced BGC model                       **
+** TEMP_RATES              if temperature-dependent water column respiration **
+** CARBON                  to add carbon constituents                        **
+** OCMIP_OXYGEN_SC         if O2 Schmidt number from Keeling et al. (1998)   **
+** OXYGEN                  to add oxygen dynamics                            **
+** PCO2AIR_DATA            if pCO2 climatology from Laurent et al. (2017)    **
+** PCO2AIR_SECULAR         if pCO2 time-depedent evolution                   **
+** PCO2AIR_MAUNALOA        if pCO2 time-depedent evolution (Mauna Loa)       **
+** PCO2AIR_SABLEISLAND     if pCO2 time-depedent evolution (Sable Island)    **
+** RW14_C02_SC             if CO2 Schmidt number from Wanninkhof (2014)      **
+** RW14_OXYGEN_SC          if O2  Schmidt number from Wanninkhof (2014)      **
+** TALK_ADDITION           if TA addition                                    **
+** TALK_FILE               if TA added from river file                       **
+** TALK_DIAG_DISS          if Additional tracer for TA addition model        **
+** TALK_TWO_FEED           if Two alkalinity feedstocks                      **
+** TALK_THREE_FEED         if Three alkalinity feedstocks                    **
+** SOC_HRM23               if parameterize SOC in online nested model        **
+** SOC_H2                  if parameterize SOC in H2 grid                    **
+** SOC_ZVAR                if SOC from TIC vs depth relationship (C. Algar)  **
+** SOC_OXYDEP              if SOC is O2 dependent when hypoxic               **
+** PP_SS                   if parameterize PP on Scotian Shelf from model    **
+** WOC_HRM23               if parameterize WOC in online nested model        ** 
+** WOC_H2                  if parameterize WOC in H2 grid                    **
+** WOC_H3                  if parameterize WOC in H3 grid                    **
+** PP_HRM23                if parameterize PP in online nested model         **
+** PP_H2                   if parameterize PP in H2 grid                     **
+**                                                                           **
 ** Hypoxia ecosysten model OPTIONS:                                          **
 **                                                                           **
 ** HYPOXIA_SRM             if Hypoxia Simple Respiration Model               **
@@ -493,7 +522,7 @@
 ** NPZD_FRANKS             if NPZD Biology model, Franks et al. (1986)       **
 ** NPZD_IRON               if NPZD Biology model with iron limitation        **
 ** NPZD_POWELL             if NPZD Biology model, Powell et al. (2006)       **
-** IRON_LIMIT              if Fe limitation on phytoplankton growth          **
+**  IRON_LIMIT              if Fe limitation on phytoplankton growth          **
 ** IRON_RELAX              if nudging Fe over the shelf, h <= FeHmin         **
 **                                                                           **
 ** Bio-optical EcoSim model OPTIONS:                                         **

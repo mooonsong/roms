@@ -1,0 +1,246 @@
+/*
+** svn $Id$
+*************************************************** Hernan G. Arango ***
+** Copyright (c) 2002-2021 The ROMS/TOMS Group                        **
+**   Licensed under a MIT/X style license                             **
+**   See License_ROMS.txt                                             **
+************************************************************************
+**                                                                    **
+**  Assigns metadata indices for the iSimple BGC model                **
+**  variables that are used in input and output NetCDF files.         **
+**  The metadata information is read from "varinfo.dat".              **
+**                                                                    **
+**  This file is included in file "mod_ncparam.F", routine            **
+**  "initialize_ncparm".                                              **
+**                                                                    **
+************************************************************************
+*/
+
+/*
+**  Model state biological tracers.
+*/
+
+#ifdef CARBON
+            CASE ('idTvar(iTIC_)')
+              idTvar(iTIC_)=varid
+            CASE ('idTvar(iTAlk)')
+              idTvar(iTAlk)=varid
+# ifdef TALK_ADDITION
+            CASE ('idTvar(iTAp1)')
+              idTvar(iTAp1)=varid
+#  if defined TALK_TWO_FEED || defined TALK_THREE_FEED
+            CASE ('idTvar(iTAp2)')
+              idTvar(iTAp2)=varid
+#  endif
+#  ifdef TALK_THREE_FEED
+            CASE ('idTvar(iTAp3)')
+              idTvar(iTAp3)=varid
+#  endif
+            CASE ('idTvar(idTIC)')
+              idTvar(idTIC)=varid
+            CASE ('idTvar(idTA)')
+              idTvar(idTA)=varid
+#  ifdef TALK_DIAG_DISS
+            CASE ('idTvar(iTArm)')
+              idTvar(iTArm)=varid
+#  endif
+# endif
+#endif
+#ifdef OXYGEN
+            CASE ('idTvar(iOxyg)')
+              idTvar(iOxyg)=varid
+#endif
+
+/*
+**  Adjoint sensitivity state biological tracers.
+*/
+
+#if defined AD_SENSITIVITY   || defined I4DVAR_ANA_SENSITIVITY || \
+    defined OPT_OBSERVATIONS || defined SENSITIVITY_4DVAR      || \
+    defined SO_SEMI
+# ifdef CARBON
+            CASE ('idTads(iTIC_)')
+              idTads(iTIC_)=varid
+            CASE ('idTads(iTAlk)')
+              idTads(iTAlk)=varid
+#  ifdef TALK_ADDITION
+            CASE ('idTads(iTAp1)')
+              idTads(iTAp1)=varid
+#  if defined TALK_TWO_FEED || defined TALK_THREE_FEED
+            CASE ('idTads(iTAp2)')
+              idTads(iTAp2)=varid
+#  endif
+#  ifdef TALK_THREE_FEED
+            CASE ('idTads(iTAp3)')
+              idTads(iTAp3)=varid
+#  endif
+            CASE ('idTads(idTIC)')
+              idTads(idTIC)=varid
+            CASE ('idTads(idTA')
+              idTads(idTA)=varid
+#   ifdef TALK_DIAG_DISS
+            CASE ('idTads(iTArm)')
+              idTads(iTArm)=varid
+#   endif
+#  endif
+# endif
+# ifdef OXYGEN
+            CASE ('idTads(iOxyg)')
+              idTads(iOxyg)=varid
+# endif
+#endif
+
+/*
+**  Biological tracers open boundary conditions.
+*/
+
+#ifdef CARBON
+            CASE ('idTbry(iwest,iTIC_)')
+              idTbry(iwest,iTIC_)=varid
+            CASE ('idTbry(ieast,iTIC_)')
+              idTbry(ieast,iTIC_)=varid
+            CASE ('idTbry(isouth,iTIC_)')
+              idTbry(isouth,iTIC_)=varid
+            CASE ('idTbry(inorth,iTIC_)')
+              idTbry(inorth,iTIC_)=varid
+
+            CASE ('idTbry(iwest,iTAlk)')
+              idTbry(iwest,iTAlk)=varid
+            CASE ('idTbry(ieast,iTAlk)')
+              idTbry(ieast,iTAlk)=varid
+            CASE ('idTbry(isouth,iTAlk)')
+              idTbry(isouth,iTAlk)=varid
+            CASE ('idTbry(inorth,iTAlk)')
+              idTbry(inorth,iTAlk)=varid
+
+# ifdef TALK_ADDITION
+            CASE ('idTbry(iwest,iTAp1)')
+              idTbry(iwest,iTAp1)=varid
+            CASE ('idTbry(ieast,iTAp1)')
+              idTbry(ieast,iTAp1)=varid
+            CASE ('idTbry(isouth,iTAp1)')
+              idTbry(isouth,iTAp1)=varid
+            CASE ('idTbry(inorth,iTAp1)')
+              idTbry(inorth,iTAp1)=varid
+
+#  if defined TALK_TWO_FEED || defined TALK_THREE_FEED
+            CASE ('idTbry(iwest,iTAp2)')
+              idTbry(iwest,iTAp2)=varid
+            CASE ('idTbry(ieast,iTAp2)')
+              idTbry(ieast,iTAp2)=varid
+            CASE ('idTbry(isouth,iTAp2)')
+              idTbry(isouth,iTAp2)=varid
+            CASE ('idTbry(inorth,iTAp2)')
+              idTbry(inorth,iTAp2)=varid
+#  endif
+#  ifdef TALK_THREE_FEED
+            CASE ('idTbry(iwest,iTAp3)')
+              idTbry(iwest,iTAp3)=varid
+            CASE ('idTbry(ieast,iTAp3)')
+              idTbry(ieast,iTAp3)=varid
+            CASE ('idTbry(isouth,iTAp3)')
+              idTbry(isouth,iTAp3)=varid
+            CASE ('idTbry(inorth,iTAp3)')
+              idTbry(inorth,iTAp3)=varid
+#  endif
+
+            CASE ('idTbry(iwest,idTIC)')
+              idTbry(iwest,idTIC)=varid
+            CASE ('idTbry(ieast,idTIC)')
+              idTbry(ieast,idTIC)=varid
+            CASE ('idTbry(isouth,idTIC)')
+              idTbry(isouth,idTIC)=varid
+            CASE ('idTbry(inorth,idTIC)')
+              idTbry(inorth,idTIC)=varid
+
+            CASE ('idTbry(iwest,idTA)')
+              idTbry(iwest,idTA)=varid
+            CASE ('idTbry(ieast,idTA)')
+              idTbry(ieast,idTA)=varid
+            CASE ('idTbry(isouth,idTA)')
+              idTbry(isouth,idTA)=varid
+            CASE ('idTbry(inorth,idTA)')
+              idTbry(inorth,idTA)=varid
+#  ifdef TALK_DIAG_DISS
+
+            CASE ('idTbry(iwest,iTArm)')
+              idTbry(iwest,iTArm)=varid
+            CASE ('idTbry(ieast,iTArm)')
+              idTbry(ieast,iTArm)=varid
+            CASE ('idTbry(isouth,iTArm)')
+              idTbry(isouth,iTArm)=varid
+            CASE ('idTbry(inorth,iTArm)')
+              idTbry(inorth,iTArm)=varid
+#  endif
+# endif
+
+#endif
+#ifdef OXYGEN
+            CASE ('idTbry(iwest,iOxyg)')
+              idTbry(iwest,iOxyg)=varid
+            CASE ('idTbry(ieast,iOxyg)')
+              idTbry(ieast,iOxyg)=varid
+            CASE ('idTbry(isouth,iOxyg)')
+              idTbry(isouth,iOxyg)=varid
+            CASE ('idTbry(inorth,iOxyg)')
+              idTbry(inorth,iOxyg)=varid
+#endif
+
+/*
+**  Biological tracers point Source/Sinks (river runoff).
+*/
+
+#ifdef CARBON
+            CASE ('idRtrc(iTIC_)')
+              idRtrc(iTIC_)=varid
+            CASE ('idRtrc(iTAlk)')
+              idRtrc(iTAlk)=varid
+# ifdef TALK_ADDITION
+            CASE ('idRtrc(iTAp1)')
+              idRtrc(iTAp1)=varid
+#  if defined TALK_TWO_FEED || defined TALK_THREE_FEED
+            CASE ('idRtrc(iTAp2)')
+              idRtrc(iTAp2)=varid
+#  endif
+#  ifdef TALK_THREE_FEED
+            CASE ('idRtrc(iTAp3)')
+              idRtrc(iTAp3)=varid
+#  endif
+            CASE ('idRtrc(idTIC)')
+              idRtrc(idTIC)=varid
+            CASE ('idRtrc(idTA)')
+              idRtrc(idTA)=varid
+#  ifdef TALK_DIAG_DISS
+            CASE ('idRtrc(iTArm)')
+              idRtrc(iTArm)=varid
+#  endif
+# endif
+#endif
+#ifdef OXYGEN
+            CASE ('idRtrc(iOxyg)')
+              idRtrc(iOxyg)=varid
+#endif
+
+#ifdef DIAGNOSTICS_BIO
+
+/*
+**  Biological tracers term diagnostics.
+*/
+
+# ifdef CARBON
+            CASE ('iDbio2(iCfxc)')
+              iDbio2(iCfxc)=varid
+            CASE ('iDbio2(ipCO2c)')
+              iDbio2(ipCO2c)=varid
+#  ifdef TALK_ADDITION
+            CASE ('iDbio2(iCfxa)')
+              iDbio2(iCfxa)=varid
+            CASE ('iDbio2(ipCO2a)')
+              iDbio2(ipCO2a)=varid
+#  endif
+# endif
+# ifdef OXYGEN
+            CASE ('iDbio2(iO2fx)')
+              iDbio2(iO2fx)=varid
+# endif
+#endif

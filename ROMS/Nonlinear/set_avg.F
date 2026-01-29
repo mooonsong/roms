@@ -780,6 +780,21 @@
         END IF
 # endif
 # ifdef SOLVE3D
+! ----- added by siyu 2026-01-26 
+#  if defined TALK_ADDITION && defined TALK_FILE
+        IF (Aout(idAtrc,ng)) THEN
+          DO j=JstrR,JendR
+            DO i=IstrR,IendR
+              AVERAGE(ng)%avgTAflx(i,j)=FORCES(ng)%taflx(i,j)
+#   ifdef WET_DRY
+              AVERAGE(ng)%avgTAflx(i,j)=AVERAGE(ng)%avgtaflx(i,j)*    &
+     &                                   GRID(ng)%rmask_full(i,j)
+#   endif
+            END DO
+          END DO
+        END IF
+#  endif
+! ----- addition end -----
 #  if defined BULK_FLUXES || defined ECOSIM || defined ATM_PRESS
         IF (Aout(idPair,ng)) THEN
           DO j=JstrR,JendR
@@ -2137,7 +2152,21 @@
         END IF
 # endif
 # ifdef SOLVE3D
-
+! ----- added by siyu 2026-01-26 -----
+#  if defined TALK_ADDITION && defined TALK_FILE
+        IF (Aout(idAtrc,ng)) THEN
+          DO j=JstrR,JendR
+            DO i=IstrR,IendR
+              AVERAGE(ng)%avgTAflx(i,j)=AVERAGE(ng)%avgTAflx(i,j)+    &
+#   ifdef WET_DRY
+     &                                 GRID(ng)%rmask_full(i,j)*        &
+#   endif
+     &                                 FORCES(ng)%taflx(i,j)
+            END DO
+          END DO
+        END IF
+#  endif
+! ----- addition end -----
 #  if defined BULK_FLUXES || defined ECOSIM || defined ATM_PRESS
         IF (Aout(idPair,ng)) THEN
           DO j=JstrR,JendR
@@ -3842,6 +3871,30 @@
         END IF
 # endif
 # ifdef SOLVE3D
+! ----- added by siyu 2026-01-26 -----
+#  if defined TALK_ADDITION && defined TALK_FILE
+        IF (Aout(idAtrc,ng)) THEN
+          DO j=JstrR,JendR
+            DO i=IstrR,IendR
+              AVERAGE(ng)%avgTAflx(i,j)=rfac(i,j)*                     &
+     &                                 AVERAGE(ng)%avgTAflx(i,j)
+            END DO
+          END DO
+          IF (EWperiodic(ng).or.NSperiodic(ng)) THEN
+            CALL exchange_r2d_tile (ng, tile,                           &
+     &                              LBi, UBi, LBj, UBj,                 &
+     &                              AVERAGE(ng)%avgTAflx)
+#   ifdef DISTRIBUTE
+            CALL mp_exchange2d (ng, tile, iNLM, 1,                      &
+     &                          LBi, UBi, LBj, UBj,                     &
+     &                          NghostPoints,                           &
+     &                          EWperiodic(ng), NSperiodic(ng),         &
+     &                          AVERAGE(ng)%avgTAflx)
+#   endif
+          END IF
+        END IF
+#  endif
+! ----- addition end -----
 #  if defined BULK_FLUXES || defined ECOSIM || defined ATM_PRESS
         IF (Aout(idPair,ng)) THEN
           DO j=JstrR,JendR

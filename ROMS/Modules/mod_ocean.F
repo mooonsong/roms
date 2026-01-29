@@ -36,8 +36,16 @@
 !                                                                      !
 !  Biology Variables.                                                  !
 !                                                                      !
-# if (defined BIO_FENNEL && defined CARBON) || defined ECB
+!----- modified by siyu 2026-01-26 ------------------------------------
+!# if (defined BIO_FENNEL && defined CARBON) || defined ECB
+# if ((defined BIO_FENNEL || defined REDUCED_BGC) && defined CARBON) || defined ECB
 !  pH           Surface concentration of hydrogen ions.                !
+#  ifdef REDUCED_BGC
+!  pHc          Surface concentration of hydrogen ions (control).      !
+#    ifdef TALK_ADDITION
+!  pHa          Surface concentration of hydrogen ions (addition).     !
+#    endif
+#  endif
 # endif
 # ifdef RED_TIDE
 !  CystIni      Red tide dinoflagellate bottom cyst initial            !
@@ -129,8 +137,16 @@
           real(r8), pointer :: uwave(:,:)
           real(r8), pointer :: vwave(:,:)
 # endif
-# if (defined BIO_FENNEL && defined CARBON) || defined ECB
+!--------  modified by siyu 2026-01-26----------------------
+!# if (defined BIO_FENNEL && defined CARBON) || defined ECB
+# if ((defined BIO_FENNEL || defined REDUCED_BGC) && defined CARBON) || defined ECB
           real(r8), pointer :: pH(:,:)
+#  ifdef REDUCED_BGC
+          real(r8), pointer :: pHc(:,:)
+#    ifdef TALK_ADDITION
+          real(r8), pointer :: pHa(:,:)
+#    endif
+#  endif
 # endif
 # ifdef RED_TIDE
           real(r8), pointer :: CystIni(:,:)
@@ -506,12 +522,23 @@
       Dmem(ng)=Dmem(ng)+size2d
 # endif
 
-# if (defined BIO_FENNEL && defined CARBON) || defined ECB
-!
+! ---- modified by Siyu 2026-01-26 ----------------------------
+!# if (defined BIO_FENNEL && defined CARBON) || defined ECB
+# if ((defined BIO_FENNEL || defined REDUCED_BGC) && defined CARBON) || defined ECB
       allocate ( OCEAN(ng) % pH(LBi:UBi,LBj:UBj) )
       Dmem(ng)=Dmem(ng)+size2d
-# endif
+#  ifdef REDUCED_BGC
 
+      allocate ( OCEAN(ng) % pHc(LBi:UBi,LBj:UBj) )
+      Dmem(ng)=Dmem(ng)+size2d
+
+#    ifdef TALK_ADDITION
+      allocate ( OCEAN(ng) % pHa(LBi:UBi,LBj:UBj) )
+      Dmem(ng)=Dmem(ng)+size2d
+#    endif
+#  endif
+# endif
+! ---- modification end ---------------------------------------
 # ifdef RED_TIDE
 !
       allocate ( OCEAN(ng) % CystIni(LBi:UBi,LBj:UBj) )
@@ -1661,10 +1688,22 @@
             OCEAN(ng) % uwave(i,j) = IniVal
             OCEAN(ng) % vwave(i,j) = IniVal
 #endif
-#if (defined BIO_FENNEL && defined CARBON && defined SOLVE3D) ||\
-    (defined ECB && defined SOLVE3D)
+
+! ---- modified by siyu 2026-01-26 ----------------------------
+
+!#if (defined BIO_FENNEL && defined CARBON && defined SOLVE3D) ||\
+!    (defined ECB && defined SOLVE3D)
+#if defined SOLVE3D && ((defined CARBON && (defined BIO_FENNEL || defined REDUCED_BGC)) || defined ECB)  
             OCEAN(ng) % pH(i,j) = 8.0_r8
+# ifdef REDUCED_BGC
+            OCEAN(ng) % pHc(i,j) = 8.0_r8
+#  ifdef TALK_ADDITION
+            OCEAN(ng) % pHa(i,j) = 8.0_r8
+#  endif
+# endif
 #endif
+
+! ---- modification end ----------------------------------------
 #ifdef RED_TIDE
             OCEAN(ng) % CystIni(i,j) = IniVal
 #endif

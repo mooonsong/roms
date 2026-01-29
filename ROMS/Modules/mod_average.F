@@ -73,6 +73,11 @@
 !  avgbvs     Bottom v-momentum stress (N/m2).                         !
 
 # ifdef SOLVE3D
+!  -----  added by siyu 2026-01-26  -----------------------------------!
+#  if defined TALK_ADDITION && defined TALK_FILE
+!  avgTAflx  Alkalinity addition flux.                                 !
+#  endif
+!  -----  addition end  -----------------------------------------------!
 !  avgstf     Surface net heat flux (W/m2).                            !
 !  avgswf     Surface net freshwater flux (kg/m2/s).                   !
 #  ifdef SHORTWAVE
@@ -219,6 +224,11 @@
 # endif
 
 # ifdef SOLVE3D
+!  -----  added by siyu 2026-01-26  --------------------------------
+#  if defined TALK_ADDITION && defined TALK_FILE
+          real(r8), pointer :: avgTAflx(:,:)
+#  endif
+!  ----- addition end  --------------------------------------------
 #  if defined BULK_FLUXES || defined ECOSIM || defined ATM_PRESS
           real(r8), pointer :: avgPair(:,:)
 #  endif
@@ -567,6 +577,13 @@
 # endif
 
 # ifdef SOLVE3D
+!  -----  added by siyu 2026-01-26  -----------------------------
+#  if defined TALK_ADDITION && defined TALK_FILE
+      IF (Aout(idAtrc,ng)) THEN
+        allocate ( AVERAGE(ng) % avgTAflx(LBi:UBi,LBj:UBj) )
+      END IF
+#  endif
+!  -----  addition end  -----------------------------------------
 #  if defined BULK_FLUXES || defined ECOSIM || defined ATM_PRESS
       IF (Aout(idPair,ng)) THEN
         allocate ( AVERAGE(ng) % avgPair(LBi:UBi,LBj:UBj) )
@@ -1906,6 +1923,17 @@
 # endif
 
 # ifdef SOLVE3D
+!  -----  added by siyu 2026-01-26  -------------------------------
+#  if defined TALK_ADDITION && defined TALK_FILE
+      IF (Aout(idAtrc,ng)) THEN
+        DO j=Jmin,Jmax
+          DO i=Imin,Imax
+            AVERAGE(ng) % avgTAflx(i,j) = IniVal
+          END DO
+        END DO
+      END IF
+#  endif
+!  -----  addition end  ------------------------------------------
 #  if defined BULK_FLUXES || defined ECOSIM || defined ATM_PRESS
       IF (Aout(idPair,ng)) THEN
         DO j=Jmin,Jmax

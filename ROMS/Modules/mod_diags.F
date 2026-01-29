@@ -62,6 +62,8 @@
 #  if defined BIO_FENNEL || defined ECB
           real(r8), pointer :: DiaBio2d(:,:,:)
           real(r8), pointer :: DiaBio3d(:,:,:,:)
+#  elif defined REDUCED_BGC 
+          real(r8), pointer :: DiaBio2d(:,:,:)
 #  elif defined ECOSIM
           real(r8), pointer :: DiaBio3d(:,:,:,:)
           real(r8), pointer :: DiaBio4d(:,:,:,:,:)
@@ -147,6 +149,11 @@
       IF (NDbio3d.gt.0) THEN
         allocate ( DIAGS(ng) % DiaBio3d(LBi:UBi,LBj:UBj,N(ng),NDbio3d) )
         Dmem(ng)=Dmem(ng)+REAL(N(ng)*NDbio3d,r8)*size2d
+      END IF
+#  elif defined REDUCED_BGC 
+      IF (NDbio2d.gt.0) THEN
+        allocate ( DIAGS(ng) % DiaBio2d(LBi:UBi,LBj:UBj,NDbio2d) )
+        Dmem(ng)=Dmem(ng)+REAL(NDbio2d,r8)*size2d
       END IF
 #  elif defined ECOSIM
       IF (NDbio3d.gt.0) THEN
@@ -447,6 +454,14 @@
               DO i=Imin,Imax
                 DIAGS(ng) % DiaBio3d(i,j,k,idiag) = IniVal
               END DO
+            END DO
+          END DO
+        END IF
+#  elif defined REDUCED_BGC
+        IF (NDbio2d.gt.0) THEN
+          DO idiag=1,NDbio2d
+            DO i=Imin,Imax
+              DIAGS(ng) % DiaBio2d(i,j,idiag) = IniVal
             END DO
           END DO
         END IF

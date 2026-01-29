@@ -990,7 +990,7 @@
       Coptions(is:is+17)=' DENITRIFICATION,'
 #endif
 #if defined DIAGNOSTICS_BIO && \
-   (defined BIO_FENNEL      || defined ECB || defined HYPOXIA_SRM)
+     (defined BIO_FENNEL || defined ECB || defined HYPOXIA_SRM || defined REDUCED_BGC)
 !
       IF (Master) WRITE (stdout,20) 'DIAGNOSTICS_BIO',                  &
      &   'Computing and writing biological diagnostic terms'
@@ -2040,7 +2040,7 @@
       Coptions(is:is+18)=' OPT_PERTURBATION,'
       idriver=idriver+1
 #endif
-#if (defined OXYGEN && defined BIO_FENNEL) || defined ECB
+#if (defined OXYGEN && (defined BIO_FENNEL || defined REDUCED_BGC)) || defined ECB
 # ifdef OCMIP_OXYGEN_SC
 !
       IF (Master) WRITE (stdout,20) 'OCMIP_OXYGEN_SC',                  &
@@ -2089,7 +2089,7 @@
       is=LEN_TRIM(Coptions)+1
       Coptions(is:is+10)=' PBLH,'
 #endif
-#if (defined CARBON && defined BIO_FENNEL) || defined ECB
+#if (defined CARBON && (defined BIO_FENNEL || defined REDUCED_BGC)) || defined ECB
 # if defined PCO2AIR_DATA
 !
       IF (Master) WRITE (stdout,20) 'PCO2AIR_DATA',                     &
@@ -2261,7 +2261,7 @@
       is=LEN_TRIM(Coptions)+1
       Coptions(is:is+21)=' REMOVE_LAPACK_GOTOS,'
 #endif
-#if (defined OXYGEN && defined BIO_FENNEL) || defined ECB
+#if (defined OXYGEN && (defined BIO_FENNEL || defined REDUCED_BGC)) || defined ECB
 # if defined OCMIP_OXYGEN_SC
 !
       IF (Master) WRITE (stdout,20) 'OCMIP_OXYGEN_SC',                  &
@@ -2540,6 +2540,14 @@
       is=LEN_TRIM(Coptions)+1
       Coptions(is:is+13)=' !RST_SINGLE,'
 #endif
+! ----- added by siyu 2026-01-26 -----
+#if defined TALK_ADDITION && defined TALK_FILE
+      IF (Master) WRITE (stdout,20) 'TA_FLUX',                          &
+     &   'alkalinity addition flux.'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+9)=' TA_FLUX,'
+#endif
+! ----- addition end -----
 #if defined R4DVAR && !defined SPLIT_R4DVAR
 !
       IF (Master) WRITE (stdout,20) 'R4DVAR',                           &
@@ -2690,6 +2698,182 @@
       Coptions(is:is+11)=' SG_LOGINT,'
 # endif
 #endif
+
+!---- added by Siyu 2026-01-26------------------------------------------
+#ifdef REDUCED_BGC 
+!
+      IF (Master) WRITE (stdout,20) 'REDUCED_BGC',                      &
+     &   'Reduced BGC model'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+17)=' REDUCED_BGC,'
+      ibiology=ibiology+1
+# ifdef TEMP_RATES
+      IF (Master) WRITE (stdout,20) 'TEMP_RATES',                       &
+     &   'Temperature dependent rates.'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+12)=' TEMP_RATES,'
+# endif
+# ifdef P_PRODUCTION
+!
+      IF (Master) WRITE (stdout,20) 'P_PRODUCTION',                     &
+     &   'Primary production parameterization.'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+14)=' P_PRODUCTION,'
+#  ifdef PP_SS
+!
+      IF (Master) WRITE (stdout,20) 'PP_SS',                            &
+     &   'Scotian Shelf PP parameterization.'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+7)=' PP_SS,'
+#  endif
+#  ifdef PP_HRM23
+!
+      IF (Master) WRITE (stdout,20) 'PP_HRM23',                         &
+     &   'HRM23 nested grids PP parameterization.'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+10)=' PP_HRM23,'
+#  endif
+#  ifdef PP_H23
+!
+      IF (Master) WRITE (stdout,20) 'PP_H23',                           &
+     &   'H23 nested grids PP parameterization.'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+8)=' PP_H23,'
+#  endif
+#  ifdef PP_H2
+!
+      IF (Master) WRITE (stdout,20) 'PP_H2',                            &
+     &   'H2 grid PP parameterization.'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+7)=' PP_H2,'
+#  endif
+#  ifdef PP_H3
+!
+      IF (Master) WRITE (stdout,20) 'PP_H3',                            &
+     &   'H3 grid PP parameterization.'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+7)=' PP_H3,'
+#  endif
+# endif
+# ifdef TALK_ADDITION
+!
+      IF (Master) WRITE (stdout,20) 'TALK_ADDITION',                    &
+     &   'Alkalinity addition module.'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+15)=' TALK_ADDITION,'
+#  ifdef TALK_FILE
+!
+      IF (Master) WRITE (stdout,20) 'TALK_FILE',                        &
+     &   'Alkalinity addition file.'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+11)=' TALK_FILE,'
+#  endif
+#  ifdef TALK_DIAG_DISS
+!
+      IF (Master) WRITE (stdout,20) 'TALK_DIAG_DISS',                   &
+     &   'Additional tracer for addition module.'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+17)=' TALK_DIAG_DISS,'
+#  endif
+#  ifdef TALK_TWO_FEED
+!
+      IF (Master) WRITE (stdout,20) 'TALK_TWO_FEED',                    &
+     &   'Two feedstocks for addition module.'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+15)=' TALK_TWO_FEED,'
+#  endif
+#  ifdef TALK_THREE_FEED
+!
+      IF (Master) WRITE (stdout,20) 'TALK_THREE_FEED',                  &
+     &   'Three feedstocks for addition module.'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+17)=' TALK_THREE_FEED,'
+#  endif
+# endif
+# if defined TALK_TWO_FEED && defined TALK_THREE_FEED
+!
+!  Stop if using more than one multi feedstock option.
+!
+      IF (Master) THEN
+        WRITE (stdout,100)
+ 100    FORMAT (/,' CHECKDEFS - More than one multi feedstock',         &
+     &            ' option selected for addition model.')
+        exit_flag=5
+      END IF
+# endif
+# ifdef WOC_H2 
+!
+      IF (Master) WRITE (stdout,20) 'WOC_H2',                           &
+     &   'H2 grid WOC parameterization.'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+8)=' WOC_H2,'
+# endif
+# ifdef WOC_H3
+!
+      IF (Master) WRITE (stdout,20) 'WOC_H3',                           &
+     &   'H3 grid WOC parameterization.'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+8)=' WOC_H3,'
+# endif
+# ifdef WOC_HRM23
+!
+      IF (Master) WRITE (stdout,20) 'WOC_HRM23',                        &
+     &   'HRM23 nested grid WOC parameterization.'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+11)=' WOC_HRM23,'
+# endif
+# ifdef WOC_H23
+!
+      IF (Master) WRITE (stdout,20) 'WOC_H23',                          &
+     &   'H23 nested grid WOC parameterization.'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+9)=' WOC_H23,'
+# endif
+# ifdef SOC_H2
+!
+      IF (Master) WRITE (stdout,20) 'SOC_H2',                           &
+     &   'H2 grid SOC parameterization.'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+8)=' SOC_H2,'
+# endif
+# ifdef SOC_H3
+!
+      IF (Master) WRITE (stdout,20) 'SOC_H3',                           &
+     &   'H3 grid SOC parameterization.'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+8)=' SOC_H3,'
+# endif
+# ifdef SOC_HRM23
+!
+      IF (Master) WRITE (stdout,20) 'SOC_HRM23',                        &
+     &   'HRM23 nested grid SOC parameterization.'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+11)=' SOC_HRM23,'
+# endif
+# ifdef SOC_H23
+!
+      IF (Master) WRITE (stdout,20) 'SOC_H23',                          &
+     &   'H23 nested grid SOC parameterization.'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+9)=' SOC_H23,'
+# endif
+# ifdef SOC_ZVAR
+!
+      IF (Master) WRITE (stdout,20) 'SOC_ZVAR',                         &
+     &   'SOC varying with depth in Halifax Harbour.'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+10)=' SOC_ZVAR,'
+# endif
+# ifdef SOC_H23
+!
+      IF (Master) WRITE (stdout,20) 'SOC_OXYDEP',                       &
+     &   'SOC vary with depth in Halifax Harbour.'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+12)=' SOC_OXYDEP,'
+# endif
+#endif
+!----end-----------------------------------------------------------------
+
 #ifdef SINGLE_PRECISION
 !
       IF (Master) WRITE (stdout,20) 'SINGLE_PRECISION',                 &
@@ -2987,7 +3171,9 @@
       is=LEN_TRIM(Coptions)+1
       Coptions(is:is+15)=' SWAN_COUPLING,'
 #endif
-#if (defined CARBON && defined BIO_FENNEL) || defined ECB
+
+!----changed by Siyu 2026-01-26-----------------------------------------
+#if (defined CARBON && (defined BIO_FENNEL || defined REDUCED_BGC)) || defined ECB
 # ifdef TALK_NONCONSERV
 !
       IF (Master) WRITE (stdout,20) 'TALK_NONCONSERV',                  &

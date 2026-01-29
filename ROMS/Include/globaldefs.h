@@ -799,6 +799,7 @@
 */
 
 #if defined BIO_FENNEL  || \
+    defined REDUCED_BGC || \
     defined ECB         || \
     defined ECOSIM      || \
     defined HYPOXIA_SRM || \
@@ -1135,6 +1136,7 @@
 
 #if defined DIAGNOSTICS_BIO && \
   !(defined BIO_FENNEL      || \
+    defined REDUCED_BGC     || \
     defined ECB             || \
     defined ECOSIM          || \
     defined HYPOXIA_SRM)
