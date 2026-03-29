@@ -1585,14 +1585,43 @@
 #  endif
 #  ifdef OXYGEN
                 Bio(i,1,iOxyg)=MAX(Bio(i,1,iOxyg)-cff1*cff3,0.0_r8) 
+#   ifdef DIAGNOSTICS_SOC                
+                  IF (ibio.eq.iPhyt) THEN   
+                        DiaBio2d(i,j,iSOC_Phyt)=DiaBio2d(i,j,iSOC_Phyt) &
+     &                                         -cff1*cff3*Hz(i,j,1)
+                  END IF
+                  IF (ibio.eq.iSDeN) THEN
+                        DiaBio2d(i,j,iSOC_SDeN)=DiaBio2d(i,j,iSOC_SDeN) &
+     &                                   -cff1*cff3*Hz(i,j,1)
+                  END IF
+                  IF (ibio.eq.iLDeN) THEN
+                        DiaBio2d(i,j,iSOC_LDeN)=DiaBio2d(i,j,iSOC_LDeN) &
+     &                                         -cff1*cff3*Hz(i,j,1)
+                  END IF     
+#   endif        
 #  endif
 ! if not define denitrification, then all remineralized N is returned to NH4 pool.
+# else
                 Bio(i,1,iNH4_)=Bio(i,1,iNH4_)+cff1
 #   ifdef PO4
                 Bio(i,1,iPO4_)=Bio(i,1,iPO4_)+cff1*R_P2N(ng)
 #   endif
 #  ifdef OXYGEN
                 Bio(i,1,iOxyg)=MAX(Bio(i,1,iOxyg)-cff1*cff4,0.0_r8)
+#   ifdef DIAGNOSTICS_SOC  
+                IF (ibio.eq.iPhyt) THEN
+                  DiaBio2d(i,j,iSOC_Phyt)=DiaBio2d(i,j,iSOC_Phyt)      &
+     &                                   -cff1*cff4*Hz(i,j,1)
+                END IF
+                IF (ibio.eq.iSDeN) THEN
+                  DiaBio2d(i,j,iSOC_SDeN)=DiaBio2d(i,j,iSOC_SDeN)      &
+     &                                   -cff1*cff4*Hz(i,j,1)
+                END IF
+                IF (ibio.eq.iLDeN) THEN
+                  DiaBio2d(i,j,iSOC_LDeN)=DiaBio2d(i,j,iSOC_LDeN)      &
+     &                                   -cff1*cff4*Hz(i,j,1)
+                END IF    
+#   endif
 #  endif
 #  if defined CARBON && defined TALK_NONCONSERV
                 Bio(i,1,iTAlk)=Bio(i,1,iTAlk)+cff1
@@ -1641,17 +1670,17 @@
 #   endif
 #   ifdef OXYGEN
                   Bio(i,1,iOxyg)=MAX(Bio(i,1,iOxyg)-cff1*cff5,0.0_r8)  
-! #    ifdef DIAGNOSTICS_BIO            
-!                 DiaBio2d(i,j,iSOC_RPOM)=DiaBio2d(i,j,iSOC_RPOM)-cff1*cff5*Hz(i,j,1)	  
-! #    endif               
+#    ifdef DIAGNOSTICS_SOC            
+                DiaBio2d(i,j,iSOC_RPOM)=DiaBio2d(i,j,iSOC_RPOM)-cff1*cff5*Hz(i,j,1)	  
+#    endif               
 #   endif
 #  else
                 Bio(i,1,iNH4_)=Bio(i,1,iNH4_)+cff1
 #   ifdef OXYGEN
                 Bio(i,1,iOxyg)=MAX(Bio(i,1,iOxyg)-cff1*cff6,0.0_r8)
-! #    ifdef DIAGNOSTICS_BIO
-!                 DiaBio2d(i,j,iSOC_RPOM)=DiaBio2d(i,j,iSOC_RPOM)-cff1*cff6*Hz(i,j,1)	  
-! #    endif 			
+#    ifdef DIAGNOSTICS_SOC
+                DiaBio2d(i,j,iSOC_RPOM)=DiaBio2d(i,j,iSOC_RPOM)-cff1*cff6*Hz(i,j,1)	  
+#    endif 			
 #   endif
 #  endif                                        
 

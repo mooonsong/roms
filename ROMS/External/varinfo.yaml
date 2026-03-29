@@ -4476,7 +4476,7 @@ metadata:
     add_offset:     0.0d0
     scale:          1.0d0
 
-  # Time-averaged Diagnostic Variables
+  # Time-averaged Diagnostic Variables (fennel.h)
 
   - variable:       CO2_airsea                                       # Input/Output
     standard_name:  suface_mole_concentration_flux_of_carbon_dioxide_between_air_and_sea_water
@@ -4554,6 +4554,46 @@ metadata:
     type:           r3dvar
     add_offset:     0.0d0
     scale:          1.0d0
+
+  - variable:       SOC_Phyt  
+    standard_name:  mole_concentration_of_sediment_oxygen_consumption_due_to_phytoplankton_expressed_as_oxygen_at_sea_bottom
+    long_name:      sediment O2 consumption due to phytoplankton  
+    units:          millimole_O2 meter-2 day-1  
+    field:          SOC_Phyt, scalar, series  
+    time:           ocean_time  
+    index_code:     iDbio2(iSOC_Phyt)  
+    type:           r2dvar  
+    scale:          1.0d0  
+  
+  - variable:       SOC_SDeN  
+    standard_name:  mole_concentration_of_sediment_oxygen_consumption_due_to_small_detritus_expressed_as_oxygen_at_sea_bottom
+    long_name:      sediment O2 consumption due to small detritus  
+    units:          millimole_O2 meter-2 day-1  
+    field:          SOC_SDeN, scalar, series  
+    time:           ocean_time  
+    index_code:     iDbio2(iSOC_SDeN)  
+    type:           r2dvar  
+    scale:          1.0d0  
+  
+  - variable:       SOC_LDeN  
+    standard_name:  mole_concentration_of_sediment_oxygen_consumption_due_to_large_detritus_expressed_as_oxygen_at_sea_bottom
+    long_name:      sediment O2 consumption due to large detritus  
+    units:          millimole_O2 meter-2 day-1  
+    field:          SOC_LDeN, scalar, series  
+    time:           ocean_time  
+    index_code:     iDbio2(iSOC_LDeN)  
+    type:           r2dvar  
+    scale:          1.0d0  
+  
+  - variable:       SOC_RPOM  
+    standard_name:  mole_concentration_of_sediment_oxygen_consumption_due_to_river_POM_expressed_as_oxygen_at_sea_bottom
+    long_name:      sediment O2 consumption due to river POM  
+    units:          millimole_O2 meter-2 day-1  
+    field:          SOC_RPOM, scalar, series  
+    time:           ocean_time  
+    index_code:     iDbio2(iSOC_RPOM)  
+    type:           r2dvar  
+    scale:          1.0d0  
 
   # Lateral Boundary Condition Variables
 

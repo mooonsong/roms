@@ -595,6 +595,52 @@
               DO ng=1,Ngrids
                 Dout(i,ng)=Lbio(ng)
               END DO
+#  ifdef DIAGNOSTICS_SOC
+            CASE ('Dout(iSOC_Phyt)')
+              IF (iDbio2(iSOC_Phyt).eq.0) THEN
+                IF (Master) WRITE (out,40) 'iDbio2(iSOC_Phyt)'
+                exit_flag=5
+                RETURN
+              END IF
+              Npts=load_l(Nval, Cval, Ngrids, Lbio)
+              i=iDbio2(iSOC_Phyt)
+              DO ng=1,Ngrids
+                Dout(i,ng)=Lbio(ng)
+              END DO
+            CASE ('Dout(iSOC_SDeN)')
+              IF (iDbio2(iSOC_SDeN).eq.0) THEN
+                IF (Master) WRITE (out,40) 'iDbio2(iSOC_SDeN)'
+                exit_flag=5
+                RETURN
+              END IF
+              Npts=load_l(Nval, Cval, Ngrids, Lbio)
+              i=iDbio2(iSOC_SDeN)
+              DO ng=1,Ngrids
+                Dout(i,ng)=Lbio(ng)
+              END DO
+            CASE ('Dout(iSOC_LDeN)')
+              IF (iDbio2(iSOC_LDeN).eq.0) THEN
+                IF (Master) WRITE (out,40) 'iDbio2(iSOC_LDeN)'
+                exit_flag=5
+                RETURN
+              END IF
+              Npts=load_l(Nval, Cval, Ngrids, Lbio)
+              i=iDbio2(iSOC_LDeN)
+              DO ng=1,Ngrids
+                Dout(i,ng)=Lbio(ng)
+              END DO
+            CASE ('Dout(iSOC_RPOM)')
+              IF (iDbio2(iSOC_RPOM).eq.0) THEN
+                IF (Master) WRITE (out,40) 'iDbio2(iSOC_RPOM)'
+                exit_flag=5
+                RETURN
+              END IF
+              Npts=load_l(Nval, Cval, Ngrids, Lbio)
+              i=iDbio2(iSOC_RPOM)
+              DO ng=1,Ngrids
+                Dout(i,ng)=Lbio(ng)
+              END DO
+#  endif
 # endif
             CASE ('Dout(iPPro)')
               IF (iDbio3(iPPro).eq.0) THEN

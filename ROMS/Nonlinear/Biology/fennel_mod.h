@@ -114,6 +114,12 @@
       integer  :: iDNIT                       ! denitrification flux
       integer  :: ipCO2                       ! partial pressure of CO2
       integer  :: iO2fx                       ! air-sea O2 flux
+# ifdef DIAGNOSTICS_SOC  
+      integer  :: iSOC_Phyt                   ! SOC from phytoplankton
+      integer  :: iSOC_SDeN                   ! SOC from small detritus N
+      integer  :: iSOC_LDeN                   ! SOC from large detritus N
+      integer  :: iSOC_RPOM                   ! SOC from river POM
+# endif
 !
 !  Biological 3D diagnostic variable IDs.
 !
