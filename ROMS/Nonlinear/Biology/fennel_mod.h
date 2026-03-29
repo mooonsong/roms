@@ -82,16 +82,22 @@
       integer :: iZoop                  ! Zooplankton concentration
       integer :: iLDeN                  ! Large detritus N-concentration
       integer :: iSDeN                  ! Small detritus N-concentration
-#ifdef RIVER_DON
-      integer :: iRDeN                  ! River detritus N-concentration
+#ifdef RIVER_DOM
+      integer :: iRDOM                  ! River DOM N-concentration
+#endif
+#ifdef RIVER_POM
+      integer :: iRPOM                  ! River POM N-concentration
 #endif
 #ifdef CARBON
       integer :: iLDeC                  ! Large detritus C-concentration
       integer :: iSDeC                  ! Small detritus C-concentration
       integer :: iTIC_                  ! Total inorganic carbon
       integer :: iTAlk                  ! Total alkalinity
-# ifdef RIVER_DON
-      integer :: iRDeC                  ! River detritus C-concentration
+# ifdef RIVER_DOM
+      integer :: iRDOC                  ! River DOM C-concentration
+# endif
+# ifdef RIVER_POM
+      integer :: iRPOC                  ! River POM C-concentration
 # endif
 #endif
 #ifdef OXYGEN
@@ -161,7 +167,20 @@
       real(r8), allocatable :: ZooMin(:)             ! mmol_N/m3
       real(r8), allocatable :: ZooMR(:)              ! 1/day
       real(r8), allocatable :: pCO2air(:)            ! ppmv
-!
+      
+      real(r8), allocatable :: frac_oceSOC(:)   ! nondimensional 
+#ifdef RIVER_POM && defined RIVER_DOM
+      real(r8), allocatable :: RD_RRN(:)         ! 1/day
+      real(r8), allocatable :: RP_RRN(:)        ! 1/day 
+      real(r8), allocatable :: RD_RRC(:)        ! 1/day
+      real(r8), allocatable :: RP_RRC(:)        ! 1/day           
+      real(r8), allocatable :: wRPOM(:)         ! m/day
+      real(r8), allocatable :: ROM_CN(:)        ! mole_C/mole_N
+      real(r8), allocatable :: RPOM_PN(:)       ! mole_P/mole_N 
+      real(r8), allocatable :: RDOM_PN(:)       ! mole_P/mole_N 
+      real(r8), allocatable :: rOxNH4_ROM(:)    ! ratio 
+      real(r8), allocatable :: frac_rivSOC(:)   ! nondimensional                             
+#endif
       CONTAINS
 !
       SUBROUTINE initialize_biology
@@ -181,47 +200,78 @@
 !  Determine number of biological tracers.
 !-----------------------------------------------------------------------
 !
-#ifdef CARBON
-# ifdef OXYGEN
-#  if defined PO4 && defined RIVER_DON
-      NBT=15
-#  elif defined RIVER_DON && !defined PO4
-      NBT=14
-#  elif defined PO4 && !defined RIVER_DON
-      NBT=13
-#  else
-      NBT=12
-#  endif
-# else
-#  if defined PO4 && defined RIVER_DON
-      NBT=14
-#  elif defined RIVER_DON && !defined PO4
-      NBT=13
-#  elif defined PO4 && !defined RIVER_DON
-      NBT=12
-#  else
-      NBT=11
-#  endif
-# endif
-#else
-# ifdef OXYGEN
-#  if defined PO4 && defined RIVER_DON
-      NBT=10
-#  elif defined PO4 || defined RIVER_DON
-      NBT=9
-#  else
-      NBT=8
-#  endif
-# else
-#  if defined PO4 && defined RIVER_DON
-      NBT=9
-#  elif defined PO4 || defined RIVER_DON
-      NBT=8
-#  else
-      NBT=7
-#  endif
-# endif
-#endif
+!  Base tracers: NO3, NH4, Chlo, Phyt, Zoop, LDeN, SDeN (Total: 7)  
+      NBT = 7    
+
+#ifdef PO4  
+      NBT = NBT + 1  
+#endif  
+
+#ifdef RIVER_DOM
+      NBT = NBT + 1  
+#endif  
+
+#ifdef RIVER_POM  
+      NBT = NBT + 1  
+#endif  
+
+#ifdef CARBON  
+      ! Base carbon: LDeC, SDeC, TIC, TAlk (Total: 4)  
+      NBT = NBT + 4  
+# ifdef RIVER_DOM  
+      NBT = NBT + 1  
+# endif  
+# ifdef RIVER_POM  
+      NBT = NBT + 1  
+# endif  
+#endif  
+
+#ifdef OXYGEN  
+      NBT = NBT + 1  
+#endif  
+
+
+! #ifdef CARBON
+! # ifdef OXYGEN
+! #  if defined PO4 && defined RIVER_DON
+!       NBT=15
+! #  elif defined RIVER_DON && !defined PO4
+!       NBT=14
+! #  elif defined PO4 && !defined RIVER_DON
+!       NBT=13
+! #  else
+!       NBT=12
+! #  endif
+! # else
+! #  if defined PO4 && defined RIVER_DON
+!       NBT=14
+! #  elif defined RIVER_DON && !defined PO4
+!       NBT=13
+! #  elif defined PO4 && !defined RIVER_DON
+!       NBT=12
+! #  else
+!       NBT=11
+! #  endif
+! # endif
+! #else
+! # ifdef OXYGEN
+! #  if defined PO4 && defined RIVER_DON
+!       NBT=10
+! #  elif defined PO4 || defined RIVER_DON
+!       NBT=9
+! #  else
+!       NBT=8
+! #  endif
+! # else
+! #  if defined PO4 && defined RIVER_DON
+!       NBT=9
+! #  elif defined PO4 || defined RIVER_DON
+!       NBT=8
+! #  else
+!       NBT=7
+! #  endif
+! # endif
+! #endif
 
 #if defined DIAGNOSTICS && defined DIAGNOSTICS_BIO
 !
@@ -463,6 +513,64 @@
         allocate ( pCO2air(Ngrids) )
         Dmem(1)=Dmem(1)+REAL(Ngrids,r8)
       END IF
+
+      IF (.not.allocated(frac_oceSOC)) THEN
+        allocate ( frac_oceSOC(Ngrids) )
+        Dmem(1)=Dmem(1)+REAL(Ngrids,r8)
+      END IF
+      
+      IF (.not.allocated(ROM_CN)) THEN
+        allocate ( ROM_CN(Ngrids) )
+        Dmem(1)=Dmem(1)+REAL(Ngrids,r8)
+      END IF
+#ifdef RIVER_POM && defined RIVER_DOM
+      IF (.not.allocated(RD_RRN)) THEN
+        allocate ( RD_RRN(Ngrids) )
+        Dmem(1)=Dmem(1)+REAL(Ngrids,r8)
+      END IF
+
+      IF (.not.allocated(RP_RRN)) THEN
+        allocate ( RP_RRN(Ngrids) )
+        Dmem(1)=Dmem(1)+REAL(Ngrids,r8)
+      END IF
+
+      IF (.not.allocated(RD_RRC)) THEN
+        allocate ( RD_RRC(Ngrids) )
+        Dmem(1)=Dmem(1)+REAL(Ngrids,r8)
+      END IF
+
+      IF (.not.allocated(RP_RRC)) THEN
+        allocate ( RP_RRC(Ngrids) )
+        Dmem(1)=Dmem(1)+REAL(Ngrids,r8)
+      END IF
+
+      IF (.not.allocated(wRPOM)) THEN
+        allocate ( wRPOM(Ngrids) )
+        Dmem(1)=Dmem(1)+REAL(Ngrids,r8)
+      END IF
+
+
+
+      IF (.not.allocated(RPOM_PN)) THEN
+        allocate ( RPOM_PN(Ngrids) )
+        Dmem(1)=Dmem(1)+REAL(Ngrids,r8)
+      END IF
+
+      IF (.not.allocated(RDOM_PN)) THEN
+        allocate ( RDOM_PN(Ngrids) )
+        Dmem(1)=Dmem(1)+REAL(Ngrids,r8)
+      END IF
+
+      IF (.not.allocated(rOxNH4_ROM)) THEN
+        allocate ( rOxNH4_ROM(Ngrids) )
+        Dmem(1)=Dmem(1)+REAL(Ngrids,r8)
+      END IF
+
+      IF (.not.allocated(frac_rivSOC)) THEN
+        allocate ( frac_rivSOC(Ngrids) )
+        Dmem(1)=Dmem(1)+REAL(Ngrids,r8)
+      END IF
+#endif
 !
 !  Allocate biological tracer vector.
 !
@@ -501,11 +609,13 @@
       iZoop=ic+5
       iLDeN=ic+6
       iSDeN=ic+7
-      ic=ic+7
-# ifdef RIVER_DON
-      iRDeN=ic+1
-      ic=ic+1
+      ic=ic+7     ! NO3, NH4, Chlo, Phyt, Zoop, LDeN, SDeN
+# ifdef RIVER_DOM
+      iRDOM=ic+1 ; ic=ic+1
 # endif
+# ifdef RIVER_POM  
+      iRPOM=ic+1 ; ic=ic+1  ! 新增的 PON  
+# endif  
 # ifdef PO4
       iPO4_=ic+1
       ic=ic+1
@@ -516,8 +626,12 @@
       iTIC_=ic+3
       iTAlk=ic+4
       ic=ic+4
-#  ifdef RIVER_DON
-      iRDeC=ic+1
+#  ifdef RIVER_DOM
+      iRDOC=ic+1
+      ic=ic+1
+#  endif
+#  ifdef RIVER_POM
+      iRPOC=ic+1
       ic=ic+1
 #  endif
 # endif

@@ -321,10 +321,18 @@
 !
 !  Local variable declarations.
 !
-#ifdef CARBON
-      integer, parameter :: Nsink = 6
+#ifdef RIVER_POM
+# ifdef CARBON
+      integer, parameter :: Nsink = 6+2 !iPhyt, iChlo, iSDeN, iLDeN. ifdef CARBON: iSDeC, iLDeC. ifdef RIVER_POM: iRPOM, iRPOC
+# else
+      integer, parameter :: Nsink = 4+1 !iPhyt, iChlo, iSDeN, iLDeN. + iRPOM
+# endif
 #else
-      integer, parameter :: Nsink = 4
+# ifdef CARBON
+      integer, parameter :: Nsink = 6 !iPhyt, iChlo, iSDeN, iLDeN. ifdef CARBON: iSDeC, iLDeC. ifdef 
+# else
+      integer, parameter :: Nsink = 4 !iPhyt, iChlo, iSDeN, iLDeN
+# endif
 #endif
 
       integer :: Iter, i, ibio, isink, itrc, ivar, j, k, ks
@@ -437,8 +445,13 @@
       real(r8) :: Chl2C, dtdays, t_PPmax, inhNH4
 
       real(r8) :: cff, cff1, cff2, cff3, cff4, cff5
-#ifdef RIVER_DON
+      real(r8) :: cff1_wc
+      real(r8) :: facOxy1, facOxy2   ! LY: factors to limit oxygen consumption under low-O2 condition
+#ifdef RIVER_DOM
       real(r8) :: cff7, cff8
+#endif
+#ifdef RIVER_POM
+      real(r8) :: cff9, cff10
 #endif
       real(r8) :: fac1, fac2, fac3
       real(r8) :: cffL, cffR, cu, dltL, dltR
@@ -467,7 +480,15 @@
       real(r8) :: N_Flux_Pmortal, N_Flux_Zmortal
       real(r8) :: N_Flux_RemineL, N_Flux_RemineS, N_Flux_RemineR
       real(r8) :: N_Flux_Zexcret, N_Flux_Zmetabo
-
+#ifdef RIVER_POM
+      real(r8) :: N_Flux_RemineRP
+# ifdef RIVER_DOM
+      real(r8) :: N_Flux_RemineRD
+#  ifdef CARBON
+      real(r8) :: C_Flux_RemineRD, C_Flux_RemineRP
+#  endif
+# endif
+#endif
       real(r8), dimension(Nsink) :: Wbio
 
       integer, dimension(IminS:ImaxS,N(ng)) :: ksource
@@ -550,6 +571,13 @@
       idsink(5)=iSDeC
       idsink(6)=iLDeC
 #endif
+#ifdef RIVER_POM
+      idsink(7)=iRPOM
+# ifdef CARBON
+      idsink(8)=iRPOC
+# endif
+#endif 
+
 !
 !  Set vertical sinking velocity vector in the same order as the
 !  identification vector, IDSINK.
@@ -562,6 +590,13 @@
       Wbio(5)=wSDet(ng)               ! small Carbon-detritus
       Wbio(6)=wLDet(ng)               ! large Carbon-detritus
 #endif
+#ifdef RIVER_POM
+      Wbio(7)=wRPOM(ng)               ! river POM
+# ifdef CARBON
+      Wbio(8)=wRPOM(ng)               ! river POC
+# endif
+#endif
+
 !
 !  Compute inverse thickness to avoid repeated divisions.
 !
@@ -1034,32 +1069,49 @@
               Bio(i,k,iTAlk)=Bio(i,k,iTAlk)+N_Flux_RemineS+             &
      &                       N_Flux_RemineL
 # endif
-# ifdef RIVER_DON
-              cff7=dtdays*RDeRRN(ng)*fac2
+# ifdef RIVER_DOM
+              cff7=dtdays*RD_RRN(ng)*fac2
               cff8=1.0_r8/(1.0_r8+cff7)
-              Bio(i,k,iRDeN)=Bio(i,k,iRDeN)*cff8
-              N_Flux_RemineR=Bio(i,k,iRDeN)*cff7
-              Bio(i,k,iNH4_)=Bio(i,k,iNH4_)+                            &
-     &                       N_Flux_RemineR
+              Bio(i,k,iRDOM)=Bio(i,k,iRDOM)*cff8
+              N_Flux_RemineRD=Bio(i,k,iRDOM)*cff7
+              Bio(i,k,iNH4_)=Bio(i,k,iNH4_)+N_Flux_RemineRD
 #  ifdef PO4
-              Bio(i,k,iPO4_)=Bio(i,k,iPO4_)+R_P2N(ng)                   &
-     &                      *N_Flux_RemineR
+              Bio(i,k,iPO4_)=Bio(i,k,iPO4_)+RDOM_PN(ng)*N_Flux_RemineRD
 #  endif
-              Bio(i,k,iOxyg)=Bio(i,k,iOxyg)-N_Flux_RemineR*rOxNH4
+              Bio(i,k,iOxyg)=Bio(i,k,iOxyg)-N_Flux_RemineRD*rOxNH4_ROM(ng)
 #  if defined CARBON && defined TALK_NONCONSERV
-              Bio(i,k,iTAlk)=Bio(i,k,iTAlk)+N_Flux_RemineR
+              Bio(i,k,iTAlk)=Bio(i,k,iTAlk)+N_Flux_RemineRD
+#  endif
+# endif
+# ifdef RIVER_POM
+              cff9=dtdays*RP_RRN(ng)*fac2
+              cff10=1.0_r8/(1.0_r8+cff9)
+              Bio(i,k,iRPOM)=Bio(i,k,iRPOM)*cff10
+              N_Flux_RemineRP=Bio(i,k,iRPOM)*cff9
+              Bio(i,k,iNH4_)=Bio(i,k,iNH4_)+N_Flux_RemineRP
+#  ifdef PO4
+              Bio(i,k,iPO4_)=Bio(i,k,iPO4_)+RPOM_PN(ng)*N_Flux_RemineRP
+#  endif
+              Bio(i,k,iOxyg)=Bio(i,k,iOxyg)-N_Flux_RemineRP*rOxNH4_ROM(ng)
+#  if defined CARBON && defined TALK_NONCONSERV
+              Bio(i,k,iTAlk)=Bio(i,k,iTAlk)+N_Flux_RemineRP
 #  endif
 # endif
             END DO
           END DO
+! if not define oxygen, then remineralization is not inhibited and proceeds at the maximum rate.
 #else
           cff1=dtdays*SDeRRN(ng)
           cff2=1.0_r8/(1.0_r8+cff1)
           cff3=dtdays*LDeRRN(ng)
           cff4=1.0_r8/(1.0_r8+cff3)
-# ifdef RIVER_DON
-          cff7=dtdays*RDeRRN(ng)
+# ifdef RIVER_DOM
+          cff7=dtdays*RD_RRN(ng)
           cff8=1.0_r8/(1.0_r8+cff7)
+# endif
+# ifdef RIVER_POM
+          cff9=dtdays*RP_RRN(ng)
+          cff10=1.0_r8/(1.0_r8+cff9)
 # endif
           DO k=1,N(ng)
             DO i=Istr,Iend
@@ -1077,21 +1129,33 @@
               Bio(i,k,iTAlk)=Bio(i,k,iTAlk)+N_Flux_RemineS+             &
      &                       N_Flux_RemineL
 # endif
-# ifdef RIVER_DON
-              Bio(i,k,iRDeN)=Bio(i,k,iRDeN)*cff8
-              N_Flux_RemineR=Bio(i,k,iRDeN)*cff7
-              Bio(i,k,iNH4_)=Bio(i,k,iNH4_)+N_Flux_RemineR
+# ifdef RIVER_DOM
+              Bio(i,k,iRDOM)=Bio(i,k,iRDOM)*cff8
+              N_Flux_RemineRD=Bio(i,k,iRDOM)*cff7
+              Bio(i,k,iNH4_)=Bio(i,k,iNH4_)+N_Flux_RemineRD
 #  ifdef PO4
               Bio(i,k,iPO4_)=Bio(i,k,iPO4_)+R_P2N(ng)                   &
-     &                      *N_Flux_RemineR
+     &                      *N_Flux_RemineRD
 #  endif
 #  if defined CARBON && defined TALK_NONCONSERV
-              Bio(i,k,iTAlk)=Bio(i,k,iTAlk)+N_Flux_RemineR
+              Bio(i,k,iTAlk)=Bio(i,k,iTAlk)+N_Flux_RemineRD
+#  endif
+# endif
+# ifdef RIVER_POM
+              Bio(i,k,iRPOM)=Bio(i,k,iRPOM)*cff10
+              N_Flux_RemineRP=Bio(i,k,iRPOM)*cff9
+              Bio(i,k,iNH4_)=Bio(i,k,iNH4_)+N_Flux_RemineRP
+#  ifdef PO4
+              Bio(i,k,iPO4_)=Bio(i,k,iPO4_)+R_P2N(ng)* N_Flux_RemineRP
+#  endif
+#  if defined CARBON && defined TALK_NONCONSERV
+              Bio(i,k,iTAlk)=Bio(i,k,iTAlk)+N_Flux_RemineRP
 #  endif
 # endif
             END DO
           END DO
 #endif
+
 #ifdef OXYGEN
 !
 !-----------------------------------------------------------------------
@@ -1161,9 +1225,13 @@
           cff2=1.0_r8/(1.0_r8+cff1)
           cff3=dtdays*LDeRRC(ng)
           cff4=1.0_r8/(1.0_r8+cff3)
-# ifdef RIVER_DON
-          cff7=dtdays*RDeRRC(ng)
+# ifdef RIVER_DOM
+          cff7=dtdays*RD_RRC(ng)
           cff8=1.0_r8/(1.0_r8+cff7)
+# endif
+# ifdef RIVER_POM
+          cff9=dtdays*RP_RRC(ng)
+          cff10=1.0_r8/(1.0_r8+cff9)
 # endif
           DO k=1,N(ng)
             DO i=Istr,Iend
@@ -1173,10 +1241,15 @@
               C_Flux_RemineL=Bio(i,k,iLDeC)*cff3
               Bio(i,k,iTIC_)=Bio(i,k,iTIC_)+                            &
      &                       C_Flux_RemineS+C_Flux_RemineL
-# ifdef RIVER_DON
-              Bio(i,k,iRDeC)=Bio(i,k,iRDeC)*cff8
-              C_Flux_RemineR=Bio(i,k,iRDeC)*cff7
-              Bio(i,k,iTIC_)=Bio(i,k,iTIC_)+C_Flux_RemineR
+# ifdef RIVER_DOM
+              Bio(i,k,iRDOC)=Bio(i,k,iRDOC)*cff8
+              C_Flux_RemineRD=Bio(i,k,iRDOC)*cff7
+              Bio(i,k,iTIC_)=Bio(i,k,iTIC_)+C_Flux_RemineRD
+# endif
+# ifdef RIVER_POM
+              Bio(i,k,iRPOC)=Bio(i,k,iRPOC)*cff10
+              C_Flux_RemineRP=Bio(i,k,iRPOC)*cff9
+              Bio(i,k,iTIC_)=Bio(i,k,iTIC_)+C_Flux_RemineRP
 # endif
             END DO
           END DO
@@ -1474,13 +1547,30 @@
             cff2=4.0_r8/16.0_r8
 # ifdef OXYGEN
             cff3=115.0_r8/16.0_r8
-            cff4=106.0_r8/16.0_r8
+            cff4=106.0_r8/16.0_r8  
 # endif
+! iPhyt, SDeN, and LDeN -------------------------------------------------
             IF ((ibio.eq.iPhyt).or.                                     &
      &          (ibio.eq.iSDeN).or.                                     &
      &          (ibio.eq.iLDeN)) THEN
               DO i=Istr,Iend
-                cff1=FC(i,0)*Hz_inv(i,1)
+
+# ifdef OXYGEN
+#  ifdef O2_LIMITATION
+! LY: implement O2 limitation factors to detrital C remineralization   
+                facOxy1=MAX(Bio(i,1,iOxyg)-6.0_r8,0.0_r8) 
+                facOxy2=MAX(facOxy1/(3.0_r8+facOxy1),0.0_r8) 
+#  else
+                facOxy2=1.0_r8
+#  endif
+# else  
+                facOxy2=1.0_r8
+# endif
+
+                cff1=FC(i,0)*Hz_inv(i,1)*facOxy2*frac_oceSOC(ng)
+                cff1_wc=FC(i,0)*Hz_inv(i,1)                             &
+     &                 *(1.0_r8-facOxy2*frac_oceSOC(ng))
+                Bio(i,1,ibio)=Bio(i,1,ibio)+cff1_wc
 # ifdef DENITRIFICATION
                 Bio(i,1,iNH4_)=Bio(i,1,iNH4_)+cff1*cff2
 #  ifdef DIAGNOSTICS_BIO
@@ -1494,15 +1584,15 @@
                 Bio(i,1,iPO4_)=Bio(i,1,iPO4_)+cff1*R_P2N(ng)
 #  endif
 #  ifdef OXYGEN
-                Bio(i,1,iOxyg)=Bio(i,1,iOxyg)-cff1*cff3
+                Bio(i,1,iOxyg)=MAX(Bio(i,1,iOxyg)-cff1*cff3,0.0_r8) 
 #  endif
-# else
+! if not define denitrification, then all remineralized N is returned to NH4 pool.
                 Bio(i,1,iNH4_)=Bio(i,1,iNH4_)+cff1
 #   ifdef PO4
                 Bio(i,1,iPO4_)=Bio(i,1,iPO4_)+cff1*R_P2N(ng)
 #   endif
 #  ifdef OXYGEN
-                Bio(i,1,iOxyg)=Bio(i,1,iOxyg)-cff1*cff4
+                Bio(i,1,iOxyg)=MAX(Bio(i,1,iOxyg)-cff1*cff4,0.0_r8)
 #  endif
 #  if defined CARBON && defined TALK_NONCONSERV
                 Bio(i,1,iTAlk)=Bio(i,1,iTAlk)+cff1
@@ -1510,24 +1600,158 @@
 # endif
               END DO
             END IF
+!-----------------------------------------------------------------------
+!            
+! LY: the 'ifdef RIVER_POM' section below just repeats the codes above 
+! to recycle iRPOM; Here allows a fraction of RPOM (the fraction is frac_rivSOC) 
+! to be instantenously remineralized in sediment and the rest be returned back to bottom 
+! water layer (the fraction is (1-frac_rivSOC)).
+!    
+!-----------------------------------------------------------------------   
+# ifdef RIVER_POM
+            cff5=cff3*ROM_CN(ng)/PhyCN(ng)  
+            cff6=cff4*ROM_CN(ng)/PhyCN(ng)          
+            IF (ibio.eq.iRPOM) THEN
+              DO i=Istr,Iend
+# ifdef OXYGEN
+#  ifdef O2_LIMITATION
+! LY: implement O2 limitation factors to detrital C remineralization   
+                  facOxy1=MAX(Bio(i,1,iOxyg)-6.0_r8,0.0_r8) 
+                  facOxy2=MAX(facOxy1/(3.0_r8+facOxy1),0.0_r8) 
+#  else
+                  facOxy2=1.0_r8
+#  endif
+# else  
+                  facOxy2=1.0_r8
+# endif             
+                  cff1=FC(i,0)*Hz_inv(i,1)*facOxy2*frac_rivSOC(ng)  
+                  cff1_wc=FC(i,0)*Hz_inv(i,1)                             &
+	 &                   *(1.0_r8-facOxy2*frac_rivSOC(ng))
+! Return a fraction of RPOM reaching the sediment back to the bottom water layer
+                  Bio(i,1,iRPOM)=Bio(i,1,iRPOM)+cff1_wc
+
+#  ifdef DENITRIFICATION
+#   if defined CARBON && defined TALK_NONCONSERV
+                  Bio(i,1,iTAlk)=Bio(i,1,iTAlk)+cff1
+#   endif
+                  Bio(i,1,iNH4_)=Bio(i,1,iNH4_)+cff1*cff2
+#   ifdef DIAGNOSTICS_BIO
+                  DiaBio2d(i,j,iDNIT)=DiaBio2d(i,j,iDNIT)+              &
+     &                              (1.0_r8-cff2)*cff1*Hz(i,j,1) 
+#   endif
+#   ifdef OXYGEN
+                  Bio(i,1,iOxyg)=MAX(Bio(i,1,iOxyg)-cff1*cff5,0.0_r8)  
+! #    ifdef DIAGNOSTICS_BIO            
+!                 DiaBio2d(i,j,iSOC_RPOM)=DiaBio2d(i,j,iSOC_RPOM)-cff1*cff5*Hz(i,j,1)	  
+! #    endif               
+#   endif
+#  else
+                Bio(i,1,iNH4_)=Bio(i,1,iNH4_)+cff1
+#   ifdef OXYGEN
+                Bio(i,1,iOxyg)=MAX(Bio(i,1,iOxyg)-cff1*cff6,0.0_r8)
+! #    ifdef DIAGNOSTICS_BIO
+!                 DiaBio2d(i,j,iSOC_RPOM)=DiaBio2d(i,j,iSOC_RPOM)-cff1*cff6*Hz(i,j,1)	  
+! #    endif 			
+#   endif
+#  endif                                        
+
+#  ifdef PO4
+                  Bio(i,1,iPO4_)=Bio(i,1,iPO4_)+cff1*RPOM_PN(ng)
+#  endif
+! #  ifdef DIAGNOSTICS_BIO
+!                   DiaBio2d(i,j,iSED_NRem)=DiaBio2d(i,j,iSED_NRem)      &
+!      &                                   +cff1*Hz(i,j,1)
+!                   DiaBio2d(i,j,iSED_PRem)=DiaBio2d(i,j,iSED_PRem)      &
+!      &                                   +cff1*Hz(i,j,1)*RPOM_PN(ng)      
+! #  endif
+              END DO
+            END IF
+# endif
+
+!-----------------------------------------------------------------------
+! carbon: iSDeC, iLDeC, and iPhyt are converted to TIC and returned to the bottom water layer;
 # ifdef CARBON
 #  ifdef DENITRIFICATION
             cff3=12.0_r8
             cff4=0.74_r8
 #  endif
+! SDeC and LDeC --------------------------------------------------------
             IF ((ibio.eq.iSDeC).or.                                     &
      &          (ibio.eq.iLDeC))THEN
               DO i=Istr,Iend
-                cff1=FC(i,0)*Hz_inv(i,1)
+# ifdef OXYGEN
+#  ifdef O2_LIMITATION
+! LY: implement O2 limitation factors to detrital C remineralization   
+                  facOxy1=MAX(Bio(i,1,iOxyg)-6.0_r8,0.0_r8) 
+                  facOxy2=MAX(facOxy1/(3.0_r8+facOxy1),0.0_r8) 
+#  else
+                  facOxy2=1.0_r8
+#  endif
+# else  
+                  facOxy2=1.0_r8
+# endif
+                cff1=FC(i,0)*Hz_inv(i,1)*facOxy2*frac_oceSOC(ng)
+                cff1_wc=FC(i,0)*Hz_inv(i,1)                             &
+     &                   *(1.0_r8-facOxy2*frac_oceSOC(ng))  
+                Bio(i,1,ibio)=Bio(i,1,ibio)+cff1_wc 
                 Bio(i,1,iTIC_)=Bio(i,1,iTIC_)+cff1
+! #    ifdef DIAGNOSTICS_BIO            
+!                 DiaBio2d(i,j,iSDIC_RPOC_M)=DiaBio2d(i,j,iSDIC_RPOC_M)  &
+!      &                                    +cff1*Hz(i,j,1)
+! #    endif 
               END DO
             END IF
+
+! Phyt -----------------------------------------------------------------
             IF (ibio.eq.iPhyt)THEN
               DO i=Istr,Iend
-                cff1=FC(i,0)*Hz_inv(i,1)
+# ifdef OXYGEN
+#  ifdef O2_LIMITATION
+! LY: implement O2 limitation factors to detrital C remineralization   
+                  facOxy1=MAX(Bio(i,1,iOxyg)-6.0_r8,0.0_r8) 
+                  facOxy2=MAX(facOxy1/(3.0_r8+facOxy1),0.0_r8) 
+#  else
+                  facOxy2=1.0_r8
+#  endif
+# else  
+                  facOxy2=1.0_r8
+# endif
+
+                cff1=FC(i,0)*Hz_inv(i,1)*facOxy2*frac_oceSOC(ng)
+                cff1_wc=FC(i,0)*Hz_inv(i,1)                          &
+     &                 *(1.0_r8-facOxy2*frac_oceSOC(ng))   
+                Bio(i,1,ibio)=Bio(i,1,ibio)+cff1_wc        
                 Bio(i,1,iTIC_)=Bio(i,1,iTIC_)+cff1*PhyCN(ng)
               END DO
             END IF
+
+! RPOC ----------------------------------------------------------------
+#  ifdef RIVER_POM            
+            IF (ibio.eq.iRPOC) THEN
+              DO i=Istr,Iend
+# ifdef OXYGEN
+#  ifdef O2_LIMITATION
+! LY: implement O2 limitation factors to detrital C remineralization   
+                  facOxy1=MAX(Bio(i,1,iOxyg)-6.0_r8,0.0_r8) 
+                  facOxy2=MAX(facOxy1/(3.0_r8+facOxy1),0.0_r8) 
+#  else
+                  facOxy2=1.0_r8
+#  endif
+# else  
+                  facOxy2=1.0_r8
+# endif
+                  cff1=FC(i,0)*Hz_inv(i,1)*facOxy2*frac_rivSOC(ng)
+                  cff1_wc=FC(i,0)*Hz_inv(i,1)                          &
+     &                   *(1.0_r8-facOxy2*frac_rivSOC(ng))   
+                Bio(i,1,ibio)=Bio(i,1,ibio)+cff1_wc
+                Bio(i,1,iTIC_)=Bio(i,1,iTIC_)+cff1
+! #    ifdef DIAGNOSTICS_BIO            
+!                 DiaBio2d(i,j,iSDIC_RPOC_R)=DiaBio2d(i,j,iSDIC_RPOC_R)   &
+!      &                                    +cff1*Hz(i,j,1) 
+! #    endif 
+              END DO
+            END IF
+#  endif  
 # endif
 #endif
           END DO SINK_LOOP

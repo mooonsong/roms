@@ -152,7 +152,7 @@ metadata:
     long_name:      eastward momentum component at RHO-points
     units:          meter second-1                                   # [m/s]
     field:          u-eastward
-    time:           ocean_time
+    time:           bry_time
     index_code:     idu3dE
     type:           r3dvar
     add_offset:     0.0d0
@@ -163,7 +163,7 @@ metadata:
     long_name:      northward momentum component at RHO-points
     units:          meter second-1                                   # [m/s]
     field:          v-northward
-    time:           ocean_time
+    time:           bry_time
     index_code:     idv3dN
     type:           r3dvar
     add_offset:     0.0d0
@@ -1705,16 +1705,16 @@ metadata:
   ###  Atmospheric Forcing Variables  ###
   #######################################
 
-  - variable:       msl                                              # Pair      # Input
+  - variable:       Pair                                              # Pair      # Input
     standard_name:  surface_air_pressure
     long_name:      surface air pressure
     units:          millibar                                         # [millibar]
     field:          surface air pressure
-    time:           time
+    time:           clim_time
     index_code:     idPair
     type:           r2dvar
     add_offset:     0.0d0
-    scale:          0.01d0
+    scale:          1.0d0
 
   - variable:       PBLh                                             # Input
     standard_name:  atmosphere_boundary_layer_thickness
@@ -1727,23 +1727,23 @@ metadata:
     add_offset:     0.0d0
     scale:          1.0d0
 
-  - variable:       t2m                                             # Tair Input
+  - variable:       Tair                                             # Tair Input
     standard_name:  surface_air_temperature
     long_name:      surface air temperature
     units:          Celsius                                          # [Kelvin]
     field:          surface air temperature
-    time:           time
+    time:           clim_time
     index_code:     idTair
     type:           r2dvar
     add_offset:     0.0d0
     scale:          1.0d0
 
-  - variable:       qair                                             # Input
+  - variable:       Qair                                             # Input
     standard_name:  surface_relative_humidity
     long_name:      surface air relative humidity                    # relative or specific
     units:          percentage                                       # [percentage or g/kg]
     field:          surface relative humidity
-    time:           time
+    time:           clim_time
     index_code:     idQair
     type:           r2dvar                                           # relative        specific
     add_offset:     0.0d0
@@ -1760,34 +1760,34 @@ metadata:
     add_offset:     0.0d0
     scale:          1.0d0
 
-  - variable:       avg_snswrf                                       #  - variable:       *SWRAD             # Input/Output
+  - variable:       *SWRAD                                           #  - variable:       *SWRAD             # Input/Output
     standard_name:  net_downward_shortwave_flux_at_sea_water_surface
     long_name:      net solar shortwave radiation flux
     units:          watt meter-2                                     # Input:  [Watt/m2]
     field:          shortwave radiation                              # [Celsius m/s]
-    time:           time                                         # Output: [Watt/m2]
+    time:           clim_time                                         # Output: [Watt/m2]
     index_code:     idSrad
     type:           r2dvar
     add_offset:     0.0d0
     scale:          1.0d0
 
-  - variable:       avg_sdlwrf                                       # lwrad_down Input
+  - variable:       lwrad_down                                      # lwrad_down Input
     standard_name:  surface_downward_longwave_flux
     long_name:      downward longwave radiation flux
     units:          watt meter-2                                     # Input:  [Watt/m2]
     field:          downwelling longwave radiation                   # [Celsius m/s]
-    time:           time
+    time:           clim_time
     index_code:     idLdwn
     type:           r2dvar
     add_offset:     0.0d0
     scale:          1.0d0
 
-  - variable:       avg_snlwrf                                       # lwrad         # Input/Output
+  - variable:       lwrad                                       # lwrad         # Input/Output
     standard_name:  surface_net_downward_longwave_flux
     long_name:      net longwave radiation flux
     units:          watt meter-2                                     # Input: [Watt/m2]
     field:          longwave radiation                               # [Celsius m/s]
-    time:           time                                         # Output: [Watt/m2]
+    time:           clim_time                                         # Output: [Watt/m2]
     index_code:     idLrad
     type:           r2dvar
     add_offset:     0.0d0
@@ -1815,12 +1815,12 @@ metadata:
     add_offset:     0.0d0
     scale:          1.0d0
 
-  - variable:       avg_tprate                                       # rain Input
+  - variable:       rain                                             # rain Input
     standard_name:  precipitation_flux
     long_name:      rain fall rate
     units:          kilogram meter-2 second-1                        # [kg m2/s]
     field:          rain fall
-    time:           time
+    time:           clim_time
     index_code:     idrain
     type:           r2dvar
     add_offset:     0.0d0
@@ -1837,23 +1837,23 @@ metadata:
     add_offset:     0.0d0
     scale:          1.0d0                                            # 1/rhow (0.001 m3/kg) if m/s
 
-  - variable:       u10                                            # Input
+  - variable:       Uwind                                            # Input
     standard_name:  surface_x_wind
     long_name:      surface u-wind component
     units:          meter second-1                                   # [m/s]
     field:          u-wind
-    time:           time
+    time:           clim_time
     index_code:     idUair
     type:           r2dvar
     add_offset:     0.0d0
     scale:          1.0d0
 
-  - variable:       v10                                            # Input
+  - variable:       Vwind                                            # Input
     standard_name:  surface_y_wind
     long_name:      surface v-wind component
     units:          meter second-1                                   # [m/s]
     field:          v-wind
-    time:           time
+    time:           clim_time
     index_code:     idVair
     type:           r2dvar
     add_offset:     0.0d0
@@ -2500,7 +2500,7 @@ metadata:
     index_code:     idRtrc(iPO4_)
     type:           nulvar
     add_offset:     0.0d0
-    scale:          1.0d0
+    scale:          10.0d0
 
   - variable:       river_DON                                        # Input
     standard_name:  mole_concentration_of_dissolved_organic_nitrogen_transport_into_sea_water_from_rivers
@@ -2557,17 +2557,6 @@ metadata:
     add_offset:     0.0d0
     scale:          1.0d0
 
-  - variable:       river_detritus                                   # Input
-    standard_name:  mole_concentration_of_detritus_transport_expressed_as_nitrogen_into_sea_water_from_rivers
-    long_name:      river runoff detritus
-    units:          millimole_nitrogen meter-3                       # [millimole/m3]
-    field:          river detritus
-    time:           river_time
-    index_code:     idRtrc(iSDet)
-    type:           nulvar
-    add_offset:     0.0d0
-    scale:          1.0d0
-
   - variable:       river_SDeN                                       # Input
     standard_name:  mole_concentration_of_small_detritus_transport_expressed_as_nitrogen_into_sea_water_from_rivers
     long_name:      river runoff SDeN
@@ -2590,13 +2579,46 @@ metadata:
     add_offset:     0.0d0
     scale:          1.0d0
 
-  - variable:       river_RDeN                                       # Input
+  - variable:       river_RDOM                                      # Input
     standard_name:  mole_concentration_of_river_detritus_transport_expressed_as_nitrogen_into_sea_water_from_rivers
-    long_name:      river runoff RDeN
-    units:          millimole_nitrogen meter-3                       # [millimole/m3
-    field:          river RDeN
+    long_name:      river runoff RDOM
+    units:          millimole_nitrogen meter-3                       # [millimole/m3]
+    field:          river RDOM
     time:           river_time
-    index_code:     idRtrc(iRDeN)
+    index_code:     idRtrc(iRDOM)
+    type:           nulvar
+    add_offset:     0.0d0
+    scale:          1.0d0
+
+  - variable:       river_RPOM                                      # Input
+    standard_name:  mole_concentration_of_river_detritus_transport_expressed_as_nitrogen_into_sea_water_from_rivers
+    long_name:      river runoff RPOM
+    units:          millimole_nitrogen meter-3                       # [millimole/m3]
+    field:          river RPOM
+    time:           river_time
+    index_code:     idRtrc(iRPOM)
+    type:           nulvar
+    add_offset:     0.0d0
+    scale:          1.0d0
+
+  - variable:       river_RDOC                                      # Input
+    standard_name:  mole_concentration_of_river_detritus_transport_expressed_as_nitrogen_into_sea_water_from_rivers
+    long_name:      river runoff RDOC
+    units:          millimole_nitrogen meter-3                       # [millimole/m3]
+    field:          river RDOC
+    time:           river_time
+    index_code:     idRtrc(iRDOC)
+    type:           nulvar
+    add_offset:     0.0d0
+    scale:          1.0d0
+
+  - variable:       river_RPOC                                      # Input
+    standard_name:  mole_concentration_of_river_detritus_transport_expressed_as_nitrogen_into_sea_water_from_rivers
+    long_name:      river runoff RPOC
+    units:          millimole_nitrogen meter-3                       # [millimole/m3]
+    field:          river RPOC
+    time:           river_time
+    index_code:     idRtrc(iRPOC)
     type:           nulvar
     add_offset:     0.0d0
     scale:          1.0d0
@@ -2664,6 +2686,98 @@ metadata:
     time:           river_time
     index_code:     idRtrc(iOxyg)
     type:           nulvar
+    add_offset:     0.0d0
+    scale:          1.0d0
+
+#----------------------------------------------------------------------
+# River DOM
+  - variable:       RDOM                                       # Input/Output
+    standard_name:  mole_concentration_of_river_detritus_expressed_as_nitrogen_in_sea_water
+    long_name:      river nitrogen-detritus concentration
+    units:          millimole_nitrogen meter-3                       # [millimole/m3]
+    field:          river N-detritus
+    time:           ocean_time
+    index_code:     idTvar(iRDOM)
+    type:           r3dvar
+    add_offset:     0.0d0
+    scale:          1.0d0
+
+  - variable:       RDOM                                       # Input
+    standard_name:  mole_concentration_of_river_detritus_expressed_as_nitrogen_in_sea_water
+    long_name:      river nitrogen-detritus concentration functional
+    units:          millimole_nitrogen meter-3                       # [millimole/m3]
+    field:          river N-detritus functional
+    time:           ocean_time
+    index_code:     idTads(iRDOM)
+    type:           r3dvar
+    add_offset:     0.0d0
+    scale:          1.0d0
+
+  - variable:       RDOC                                       # Input/Output
+    standard_name:  mole_concentration_of_river_detritus_expressed_as_carbon_in_sea_water
+    long_name:      river carbon-detritus concentration
+    units:          millimole_carbon meter-3                         # [millimole/m3]
+    field:          river C-detritus
+    time:           ocean_time
+    index_code:     idTvar(iRDOC)
+    type:           r3dvar
+    add_offset:     0.0d0
+    scale:          1.0d0
+
+  - variable:       RDOC                                      # Input
+    standard_name:  mole_concentration_of_river_detritus_expressed_as_carbon_in_sea_water
+    long_name:      river carbon-detritus concentration functional
+    units:          millimole_carbon meter-3                       # [millimole/m3]
+    field:          river C-detritus functional
+    time:           ocean_time
+    index_code:     idTads(iRDOC)squeu
+    type:           r3dvar
+    add_offset:     0.0d0
+    scale:          1.0d0
+
+#------------------------------------------------------------------------------------------
+# River POM
+  - variable:       RPOM                                       # Input/Output
+    standard_name:  mole_concentration_of_river_detritus_expressed_as_nitrogen_in_sea_water
+    long_name:      river nitrogen-detritus concentration
+    units:          millimole_nitrogen meter-3                       # [millimole/m3]
+    field:          river N-detritus
+    time:           ocean_time
+    index_code:     idTvar(iRPOM)
+    type:           r3dvar
+    add_offset:     0.0d0
+    scale:          1.0d0
+
+  - variable:       RPOM                                       # Input
+    standard_name:  mole_concentration_of_river_detritus_expressed_as_nitrogen_in_sea_water
+    long_name:      river nitrogen-detritus concentration functional
+    units:          millimole_nitrogen meter-3                       # [millimole/m3]
+    field:          river N-detritus functional
+    time:           ocean_time
+    index_code:     idTads(iRPOM)
+    type:           r3dvar
+    add_offset:     0.0d0
+    scale:          1.0d0
+
+  - variable:       RPOC                                       # Input/Output
+    standard_name:  mole_concentration_of_river_detritus_expressed_as_carbon_in_sea_water
+    long_name:      river carbon-detritus concentration
+    units:          millimole_carbon meter-3                         # [millimole/m3]
+    field:          river C-detritus
+    time:           ocean_time
+    index_code:     idTvar(iRPOC)
+    type:           r3dvar
+    add_offset:     0.0d0
+    scale:          1.0d0
+
+  - variable:       RPOC                                       # Input
+    standard_name:  mole_concentration_of_river_detritus_expressed_as_carbon_in_sea_water
+    long_name:      river carbon-detritus concentration functional
+    units:          millimole_carbon meter-3                       # [millimole/m3]
+    field:          river C-detritus functional
+    time:           ocean_time
+    index_code:     idTads(iRPOC)
+    type:           r3dvar
     add_offset:     0.0d0
     scale:          1.0d0
 
@@ -4239,49 +4353,7 @@ metadata:
     add_offset:     0.0d0
     scale:          1.0d0
 
-  - variable:       RdetritusN                                       # Input/Output
-    standard_name:  mole_concentration_of_river_detritus_expressed_as_nitrogen_in_sea_water
-    long_name:      river nitrogen-detritus concentration
-    units:          millimole_nitrogen meter-3                       # [millimole/m3]
-    field:          river N-detritus
-    time:           ocean_time
-    index_code:     idTvar(iRDeN)
-    type:           r3dvar
-    add_offset:     0.0d0
-    scale:          1.0d0
-
-  - variable:       RdetritusN                                       # Input
-    standard_name:  mole_concentration_of_river_detritus_expressed_as_nitrogen_in_sea_water
-    long_name:      river nitrogen-detritus concentration functional
-    units:          millimole_nitrogen meter-3                       # [millimole/m3]
-    field:          river N-detritus functional
-    time:           ocean_time
-    index_code:     idTads(iRDeN)
-    type:           r3dvar
-    add_offset:     0.0d0
-    scale:          1.0d0
-
-  - variable:       RdetritusC                                       # Input/Output
-    standard_name:  mole_concentration_of_river_detritus_expressed_as_carbon_in_sea_water
-    long_name:      river carbon-detritus concentration
-    units:          millimole_carbon meter-3                         # [millimole/m3]
-    field:          river C-detritus
-    time:           ocean_time
-    index_code:     idTvar(iRDeC)
-    type:           r3dvar
-    add_offset:     0.0d0
-    scale:          1.0d0
-
-  - variable:       RdetritusC                                       # Input
-    standard_name:  mole_concentration_of_river_detritus_expressed_as_carbon_in_sea_water
-    long_name:      river carbon-detritus concentration functional
-    units:          millimole_carbon meter-3                       # [millimole/m3]
-    field:          river C-detritus functional
-    time:           ocean_time
-    index_code:     idTads(iRDeC)
-    type:           r3dvar
-    add_offset:     0.0d0
-    scale:          1.0d0
+#----------------------------------------------------------------------
 
   - variable:       TIC                                              # Input/Output
     standard_name:  mole_concentration_of_total_inorganic_carbon_in_sea_water
@@ -4490,7 +4562,7 @@ metadata:
     long_name:      nitrate eastern boundary condition
     units:          millimole_nitrogen meter-3                       # [millimole/m3]
     field:          NO3 eastern-boundary
-    time:           NO3_time
+    time:           bry_time
     index_code:     idTbry(ieast,iNO3_)
     type:           nulvar
     add_offset:     0.0d0
@@ -4501,7 +4573,7 @@ metadata:
     long_name:      nitrate western boundary condition
     units:          millimole_nitrogen meter-3                       # [millimole/m3]
     field:          NO3 western-boundary
-    time:           NO3_time
+    time:           bry_time
     index_code:     idTbry(iwest,iNO3_)
     type:           nulvar
     add_offset:     0.0d0
@@ -4512,7 +4584,7 @@ metadata:
     long_name:      nitrate southern boundary condition
     units:          millimole_nitrogen meter-3                       # [millimole/m3]
     field:          NO3 southern-boundary
-    time:           NO3_time
+    time:           bry_time
     index_code:     idTbry(isouth,iNO3_)
     type:           nulvar
     add_offset:     0.0d0
@@ -4523,7 +4595,7 @@ metadata:
     long_name:      nitrate northern boundary condition
     units:          millimole_nitrogen meter-3                       # [millimole/m3]
     field:          NO3 northern-boundary
-    time:           NO3_time
+    time:           bry_time
     index_code:     idTbry(inorth,iNO3_)
     type:           nulvar
     add_offset:     0.0d0
@@ -4534,7 +4606,7 @@ metadata:
     long_name:      phosphate eastern boundary condition
     units:          millimole_PO4 meter-3                            # [millimole/m3]
     field:          PO4 eastern-boundary
-    time:           PO4_time
+    time:           bry_time
     index_code:     idTbry(ieast,iPO4_)
     type:           nulvar
     add_offset:     0.0d0
@@ -4545,7 +4617,7 @@ metadata:
     long_name:      phosphate western boundary condition
     units:          millimole_PO4 meter-3                            # [millimole/m3]
     field:          PO4 western-boundary
-    time:           PO4_time
+    time:           bry_time
     index_code:     idTbry(iwest,iPO4_)
     type:           nulvar
     add_offset:     0.0d0
@@ -4556,7 +4628,7 @@ metadata:
     long_name:      phosphate southern boundary condition
     units:          millimole_PO4 meter-3                            # [millimole/m3]
     field:          PO4 southern-boundary
-    time:           PO4_time
+    time:           bry_time
     index_code:     idTbry(isouth,iPO4_)
     type:           nulvar
     add_offset:     0.0d0
@@ -4567,7 +4639,7 @@ metadata:
     long_name:      phosphate northern boundary condition
     units:          millimole_PO4 meter-3                            # [millimole/m3]
     field:          PO4 northern-boundary
-    time:           PO4_time
+    time:           bry_time
     index_code:     idTbry(inorth,iPO4_)
     type:           nulvar
     add_offset:     0.0d0
@@ -4578,7 +4650,7 @@ metadata:
     long_name:      TIC eastern boundary condition
     units:          millimole_carbon meter-3                         # [millimole/m3]
     field:          TIC eastern-boundary
-    time:           TIC_time
+    time:           bry_time
     index_code:     idTbry(ieast,iTIC_)
     type:           nulvar
     add_offset:     0.0d0
@@ -4600,7 +4672,7 @@ metadata:
     long_name:      TIC southern boundary condition
     units:          millimole_carbon meter-3                         # [millimole/m3]
     field:          TIC southern-boundary
-    time:           TIC_time
+    time:           bry_time
     index_code:     idTbry(isouth,iTIC_)
     type:           nulvar
     add_offset:     0.0d0
@@ -4622,7 +4694,7 @@ metadata:
     long_name:      oxygen eastern boundary condition
     units:          millimole_oxygen meter-3                         # [millimole/m3]
     field:          oxygen eastern-boundary
-    time:           oxygen_time
+    time:           bry_time
     index_code:     idTbry(ieast,iOxyg)
     type:           nulvar
     add_offset:     0.0d0
@@ -4644,7 +4716,7 @@ metadata:
     long_name:      oxygen southern boundary condition
     units:          millimole_oxygen meter-3                         # [millimole/m3]
     field:          oxygen southern-boundary
-    time:           oxygen_time
+    time:           bry_time
     index_code:     idTbry(isouth,iOxyg)
     type:           nulvar
     add_offset:     0.0d0
@@ -4666,7 +4738,7 @@ metadata:
     long_name:      alkalinity eastern boundary condition
     units:          milliequivalents meter-3                         # [milliequivalents/m3]
     field:          alkalinity eastern-boundary
-    time:           alkalinity_time
+    time:           bry_time
     index_code:     idTbry(ieast,iTAlk)
     type:           nulvar
     add_offset:     0.0d0
@@ -4677,7 +4749,7 @@ metadata:
     long_name:      alkalinity western boundary condition
     units:          milliequivalents meter-3                         # [milliequivalents/m3]
     field:          alkalinity western-boundary
-    time:           alkalinity_time
+    time:           bry_time
     index_code:     idTbry(iwest,iTAlk)
     type:           nulvar
     add_offset:     0.0d0
@@ -4688,7 +4760,7 @@ metadata:
     long_name:      alkalinity southern boundary condition
     units:          milliequivalents meter-3                         # [milliequivalents/m3]
     field:          alkalinity southern-boundary
-    time:           alkalinity_time
+    time:           bry_time
     index_code:     idTbry(isouth,iTAlk)
     type:           nulvar
     add_offset:     0.0d0
@@ -4710,7 +4782,7 @@ metadata:
     long_name:      ammonium eastern boundary condition
     units:          millimole_nitrogen meter-3                       # [millimole/m3]
     field:          NH4 eastern-boundary
-    time:           NH4_time
+    time:           bry_time
     index_code:     idTbry(ieast,iNH4_)
     type:           nulvar
     add_offset:     0.0d0
@@ -4732,7 +4804,7 @@ metadata:
     long_name:      ammonium southern boundary condition
     units:          millimole_nitrogen meter-3                       # [millimole/m3]
     field:          NH4 southern-boundary
-    time:           NH4_time
+    time:           bry_time
     index_code:     idTbry(isouth,iNH4_)
     type:           nulvar
     add_offset:     0.0d0
@@ -4754,7 +4826,7 @@ metadata:
     long_name:      dissolved organic nitrogen eastern boundary condition
     units:          millimole_nitrogen meter-3                       # [millimole/m3]
     field:          DON eastern-boundary
-    time:           DON_time
+    time:           bry_time
     index_code:     idTbry(ieast,iDON_)
     type:           nulvar
     add_offset:     0.0d0
@@ -4765,7 +4837,7 @@ metadata:
     long_name:      dissolved organic nitrogen western boundary condition
     units:          millimole_nitrogen meter-3                       # [millimole/m3]
     field:          DON western-boundary
-    time:           DON_time
+    time:           bry_time
     index_code:     idTbry(iwest,iDON_)
     type:           nulvar
     add_offset:     0.0d0
@@ -4776,7 +4848,7 @@ metadata:
     long_name:      dissolved organic nitrogen southern boundary condition
     units:          millimole_nitrogen meter-3                       # [millimole/m3]
     field:          DON southern-boundary
-    time:           DON_time
+    time:           bry_time
     index_code:     idTbry(isouth,iDON_)
     type:           nulvar
     add_offset:     0.0d0
@@ -4798,7 +4870,7 @@ metadata:
     long_name:      particulate organic nitrogen eastern boundary condition
     units:          millimole_nitrogen meter-3                       # [millimole/m3]
     field:          PON eastern-boundary
-    time:           PON_time
+    time:           bry_time
     index_code:     idTbry(ieast,iPON_)
     type:           nulvar
     add_offset:     0.0d0
@@ -4809,7 +4881,7 @@ metadata:
     long_name:      particulate organic nitrogen western boundary condition
     units:          millimole_nitrogen meter-3                       # [millimole/m3]
     field:          PON western-boundary
-    time:           PON_time
+    time:           bry_time
     index_code:     idTbry(iwest,iPON_)
     type:           nulvar
     add_offset:     0.0d0
@@ -4820,7 +4892,7 @@ metadata:
     long_name:      particulate organic nitrogen southern boundary condition
     units:          millimole_nitrogen meter-3                       # [millimole/m3]
     field:          PON southern-boundary
-    time:           PON_time
+    time:           bry_time
     index_code:     idTbry(isouth,iPON_)
     type:           nulvar
     add_offset:     0.0d0
@@ -4974,7 +5046,7 @@ metadata:
     long_name:      phytoplankton eastern boundary condition
     units:          millimole_nitrogen meter-3                       # [millimole/m3]
     field:          phytoplankton eastern-boundary
-    time:           phyt_time
+    time:           bry_time
     index_code:     idTbry(ieast,iPhyt)
     type:           nulvar
     add_offset:     0.0d0
@@ -4985,7 +5057,7 @@ metadata:
     long_name:      phytoplankton western boundary condition
     units:          millimole_nitrogen meter-3                       # [millimole/m3]
     field:          phytoplankton western-boundary
-    time:           phyt_time
+    time:           bry_time
     index_code:     idTbry(iwest,iPhyt)
     type:           nulvar
     add_offset:     0.0d0
@@ -4996,7 +5068,7 @@ metadata:
     long_name:      phytoplankton southern boundary condition
     units:          millimole_nitrogen meter-3                       # [millimole/m3]
     field:          phytoplankton southern-boundary
-    time:           phyt_time
+    time:           bry_time
     index_code:     idTbry(isouth,iPhyt)
     type:           nulvar
     add_offset:     0.0d0
@@ -5150,7 +5222,7 @@ metadata:
     long_name:      zooplankton eastern boundary condition
     units:          millimole_nitrogen meter-3                       # [millimole/m3]
     field:          zooplankton eastern-boundary
-    time:           zoop_time
+    time:           bry_time
     index_code:     idTbry(ieast,iZoop)
     type:           nulvar
     add_offset:     0.0d0
@@ -5172,7 +5244,7 @@ metadata:
     long_name:      zooplankton southern boundary condition
     units:          millimole_nitrogen meter-3                       # [millimole/m3]
     field:          zooplankton southern-boundary
-    time:           zoop_time
+    time:           bry_time
     index_code:     idTbry(isouth,iZoop)
     type:           nulvar
     add_offset:     0.0d0
@@ -5326,7 +5398,7 @@ metadata:
     long_name:      chlorophyll eastern boundary condition
     units:          milligram meter-3                                # [milligram/m3]
     field:          chlorophyll eastern-boundary
-    time:           chlo_time
+    time:           bry_time
     index_code:     idTbry(ieast,iChlo)
     type:           nulvar
     add_offset:     0.0d0
@@ -5337,7 +5409,7 @@ metadata:
     long_name:      chlorophyll western boundary condition
     units:          milligram meter-3                                # [milligram/m3]
     field:          chlorophyll western-boundary
-    time:           chlo_time
+    time:           bry_time
     index_code:     idTbry(iwest,iChlo)
     type:           nulvar
     add_offset:     0.0d0
@@ -5348,7 +5420,7 @@ metadata:
     long_name:      chlorophyll southern boundary condition
     units:          milligram meter-3                                # [milligram/m3]
     field:          chlorophyll southern-boundary
-    time:           chlo_time
+    time:           bry_time
     index_code:     idTbry(isouth,iChlo)
     type:           nulvar
     add_offset:     0.0d0
@@ -5414,7 +5486,7 @@ metadata:
     long_name:      large nitrogen-detritus eastern boundary condition
     units:          millimole_nitrogen meter-3                       # [millimole/m3]
     field:          large N-detritus eastern-boundary
-    time:           LDeN_time
+    time:           bry_time
     index_code:     idTbry(ieast,iLDeN)
     type:           nulvar
     add_offset:     0.0d0
@@ -5425,7 +5497,7 @@ metadata:
     long_name:      large nitrogen-detritus western boundary condition
     units:          millimole_nitrogen meter-3                       # [millimole/m3]
     field:          large N-detritus western-boundary
-    time:           LDeN_time
+    time:           bry_time
     index_code:     idTbry(iwest,iLDeN)
     type:           nulvar
     add_offset:     0.0d0
@@ -5436,7 +5508,7 @@ metadata:
     long_name:      large nitrogen-detritus southern boundary condition
     units:          millimole_nitrogen meter-3                       # [millimole/m3]
     field:          large N-detritus southern-boundary
-    time:           LDeN_time
+    time:           bry_time
     index_code:     idTbry(isouth,iLDeN)
     type:           nulvar
     add_offset:     0.0d0
@@ -5458,7 +5530,7 @@ metadata:
     long_name:      small nitrogen-detritus eastern boundary condition
     units:          millimole_nitrogen meter-3                       # [millimole/m3]
     field:          small N-detritus eastern-boundary
-    time:           SDeN_time
+    time:           bry_time
     index_code:     idTbry(ieast,iSDeN)
     type:           nulvar
     add_offset:     0.0d0
@@ -5469,7 +5541,7 @@ metadata:
     long_name:      small nitrogen-detritus western boundary condition
     units:          millimole_nitrogen meter-3                       # [millimole/m3]
     field:          small N-detritus western-boundary
-    time:           SDeN_time
+    time:           bry_time
     index_code:     idTbry(iwest,iSDeN)
     type:           nulvar
     add_offset:     0.0d0
@@ -5480,7 +5552,7 @@ metadata:
     long_name:      small nitrogen-detritus southern boundary condition
     units:          millimole_nitrogen meter-3                       # [millimole/m3]
     field:          small N-detritus southern-boundary
-    time:           SDeN_time
+    time:           bry_time
     index_code:     idTbry(isouth,iSDeN)
     type:           nulvar
     add_offset:     0.0d0
@@ -5497,84 +5569,40 @@ metadata:
     add_offset:     0.0d0
     scale:          1.0d0
 
-  - variable:       RDeN_east                                        # Input
-    standard_name:  mole_concentration_of_river_detritus_expressed_as_nitrogen_in_sea_water
-    long_name:      river nitrogen-detritus eastern boundary condition
-    units:          millimole_nitrogen meter-3                       # [millimole/m3]
-    field:          river N-detritus eastern-boundary
-    time:           RDeN_time
-    index_code:     idTbry(ieast,iRDeN)
-    type:           nulvar
-    add_offset:     0.0d0
-    scale:          1.0d0
-
-  - variable:       RDeN_west                                        # Input
-    standard_name:  mole_concentration_of_river_detritus_expressed_as_nitrogen_in_sea_water
-    long_name:      river nitrogen-detritus western boundary condition
-    units:          millimole_nitrogen meter-3                       # [millimole/m3]
-    field:          river N-detritus western-boundary
-    time:           RDeN_time
-    index_code:     idTbry(iwest,iRDeN)
-    type:           nulvar
-    add_offset:     0.0d0
-    scale:          1.0d0
-
-  - variable:       RDeN_south                                       # Input
-    standard_name:  mole_concentration_of_river_detritus_expressed_as_nitrogen_in_sea_water
-    long_name:      river nitrogen-detritus southern boundary condition
-    units:          millimole_nitrogen meter-3                       # [millimole/m3]
-    field:          river N-detritus southern-boundary
-    time:           RDeN_time
-    index_code:     idTbry(isouth,iRDeN)
-    type:           nulvar
-    add_offset:     0.0d0
-    scale:          1.0d0
-
-  - variable:       RDeN_north                                       # Input
-    standard_name:  mole_concentration_of_river_detritus_expressed_as_nitrogen_in_sea_water
-    long_name:      river nitrogen-detritus northern boundary condition
-    units:          millimole_nitrogen meter-3                       # [millimole/m3]
-    field:          river N-detritus northern-boundary
-    time:           RDeN_time
-    index_code:     idTbry(inorth,iRDeN)
-    type:           nulvar
-    add_offset:     0.0d0
-    scale:          1.0d0
-
-  - variable:       LdeC_east                                        # Input
+  - variable:       LDeC_east                                        # Input
     standard_name:  mole_concentration_of_large_detritus_expressed_as_carbon_in_sea_water
     long_name:      large carbon-detritus eastern boundary condition
     units:          millimole_carbon meter-3                         # [millimole/m3]
     field:          large C-detritus eastern-boundary
-    time:           LdeC_time
+    time:           bry_time
     index_code:     idTbry(ieast,iLDeC)
     type:           nulvar
     add_offset:     0.0d0
     scale:          1.0d0
 
-  - variable:       LdeC_west                                        # Input
+  - variable:       LDeC_west                                        # Input
     standard_name:  mole_concentration_of_large_detritus_expressed_as_carbon_in_sea_water
     long_name:      large carbon-detritus western boundary condition
     units:          millimole_carbon meter-3                         # [millimole/m3]
     field:          large C-detritus western-boundary
-    time:           LdeC_time
+    time:           bry_time
     index_code:     idTbry(iwest,iLDeC)
     type:           nulvar
     add_offset:     0.0d0
     scale:          1.0d0
 
-  - variable:       LdeC_south                                       # Input
+  - variable:       LDeC_south                                       # Input
     standard_name:  mole_concentration_of_large_detritus_expressed_as_carbon_in_sea_water
     long_name:      large carbon-detritus southern boundary condition
     units:          millimole_carbon meter-3                         # [millimole/m3]
     field:          large C-detritus southern-boundary
-    time:           LdeC_time
+    time:           bry_time
     index_code:     idTbry(isouth,iLDeC)
     type:           nulvar
     add_offset:     0.0d0
     scale:          1.0d0
 
-  - variable:       LdeC_north                                       # Input
+  - variable:       LDeC_north                                       # Input
     standard_name:  mole_concentration_of_large_detritus_expressed_as_carbon_in_sea_water
     long_name:      large carbon-detritus northern boundary condition
     units:          millimole_carbon meter-3                         # [millimole/m3]
@@ -5585,40 +5613,40 @@ metadata:
     add_offset:     0.0d0
     scale:          1.0d0
 
-  - variable:       SdeC_east                                        # Input
+  - variable:       SDeC_east                                        # Input
     standard_name:  mole_concentration_of_small_detritus_expressed_as_carbon_in_sea_water
     long_name:      small carbon-detritus eastern boundary condition
     units:          millimole_carbon meter-3                         # [millimole/m3]
     field:          small C-detritus eastern-boundary
-    time:           SdeC_time
+    time:           bry_time
     index_code:     idTbry(ieast,iSDeC)
     type:           nulvar
     add_offset:     0.0d0
     scale:          1.0d0
 
-  - variable:       SdeC_west                                        # Input
+  - variable:       SDeC_west                                        # Input
     standard_name:  mole_concentration_of_small_detritus_expressed_as_carbon_in_sea_water
     long_name:      small carbon-detritus western boundary condition
     units:          millimole_carbon meter-3                         # [millimole/m3]
     field:          small C-detritus western-boundary
-    time:           SdeC_time
+    time:           bry_time
     index_code:     idTbry(iwest,iSDeC)
     type:           nulvar
     add_offset:     0.0d0
     scale:          1.0d0
 
-  - variable:       SdeC_south                                       # Input
+  - variable:       SDeC_south                                       # Input
     standard_name:  mole_concentration_of_small_detritus_expressed_as_carbon_in_sea_water
     long_name:      small carbon-detritus southern boundary condition
     units:          millimole_carbon meter-3                         # [millimole/m3]
     field:          small C-detritus southern-boundary
-    time:           SdeC_time
+    time:           bry_time
     index_code:     idTbry(isouth,iSDeC)
     type:           nulvar
     add_offset:     0.0d0
     scale:          1.0d0
 
-  - variable:       SdeC_north                                       # Input
+  - variable:       SDeC_north                                       # Input
     standard_name:  mole_concentration_of_small_detritus_expressed_as_carbon_in_sea_water
     long_name:      small carbon-detritus northern boundary condition
     units:          millimole_carbon meter-3                         # [millimole/m3]
@@ -5629,50 +5657,181 @@ metadata:
     add_offset:     0.0d0
     scale:          1.0d0
 
-  - variable:       RDeC_east                                        # Input
+  - variable:       RDOC_east                                        # Input
     standard_name:  mole_concentration_of_river_detritus_expressed_as_carbon_in_sea_water
     long_name:      river carbon-detritus eastern boundary condition
     units:          millimole_carbon meter-3                         # [millimole/m3]
     field:          river C-detritus eastern-boundary
-    time:           RDeC_time
-    index_code:     idTbry(ieast,iRDeC)
+    time:           bry_time
+    index_code:     idTbry(ieast,iRDOC)
     type:           nulvar
     add_offset:     0.0d0
     scale:          1.0d0
 
-  - variable:       RDeC_west                                        # Input
+  - variable:       RDOC_west                                        # Input
     standard_name:  mole_concentration_of_river_detritus_expressed_as_carbon_in_sea_water
     long_name:      river carbon-detritus western boundary condition
     units:          millimole_carbon meter-3                         # [millimole/m3]
     field:          river C-detritus western-boundary
-    time:           RDeC_time
-    index_code:     idTbry(iwest,iRDeC)
+    time:           bry_time
+    index_code:     idTbry(iwest,iRDOC)
     type:           nulvar
     add_offset:     0.0d0
     scale:          1.0d0
 
-  - variable:       RDeC_south                                       # Input
+  - variable:       RDOC_south                                       # Input
     standard_name:  mole_concentration_of_river_detritus_expressed_as_carbon_in_sea_water
     long_name:      river carbon-detritus southern boundary condition
     units:          millimole_carbon meter-3                         # [millimole/m3]
     field:          river C-detritus southern-boundary
-    time:           RDeC_time
-    index_code:     idTbry(isouth,iRDeC)
+    time:           bry_time
+    index_code:     idTbry(isouth,iRDOC)
     type:           nulvar
     add_offset:     0.0d0
     scale:          1.0d0
 
-  - variable:       RDeC_north                                       # Input
+  - variable:       RDOC_north                                       # Input
     standard_name:  mole_concentration_of_river_detritus_expressed_as_carbon_in_sea_water
     long_name:      river carbon-detritus northern boundary condition
     units:          millimole_carbon meter-3                         # [millimole/m3]
     field:          river C-detritus northern-boundary
-    time:           RDeC_time
-    index_code:     idTbry(inorth,iRDeC)
+    time:           bry_time
+    index_code:     idTbry(inorth,iRDOC)
     type:           nulvar
     add_offset:     0.0d0
     scale:          1.0d0
 
+  - variable:       RPOC_east                                        # Input
+    standard_name:  mole_concentration_of_river_detritus_expressed_as_carbon_in_sea_water
+    long_name:      river carbon-detritus eastern boundary condition
+    units:          millimole_carbon meter-3                         # [millimole/m3]
+    field:          river C-detritus eastern-boundary
+    time:           bry_time
+    index_code:     idTbry(ieast,iRPOC)
+    type:           nulvar
+    add_offset:     0.0d0
+    scale:          1.0d0
+
+  - variable:       RPOC_west                                        # Input
+    standard_name:  mole_concentration_of_river_detritus_expressed_as_carbon_in_sea_water
+    long_name:      river carbon-detritus western boundary condition
+    units:          millimole_carbon meter-3                         # [millimole/m3]
+    field:          river C-detritus western-boundary
+    time:           bry_time
+    index_code:     idTbry(iwest,iRPOC)
+    type:           nulvar
+    add_offset:     0.0d0
+    scale:          1.0d0
+
+  - variable:       RPOC_south                                       # Input
+    standard_name:  mole_concentration_of_river_detritus_expressed_as_carbon_in_sea_water
+    long_name:      river carbon-detritus southern boundary condition
+    units:          millimole_carbon meter-3                         # [millimole/m3]
+    field:          river C-detritus southern-boundary
+    time:           bry_time
+    index_code:     idTbry(isouth,iRPOC)
+    type:           nulvar
+    add_offset:     0.0d0
+    scale:          1.0d0
+
+  - variable:       RPOC_north                                       # Input
+    standard_name:  mole_concentration_of_river_detritus_expressed_as_carbon_in_sea_water
+    long_name:      river carbon-detritus northern boundary condition
+    units:          millimole_carbon meter-3                         # [millimole/m3]
+    field:          river C-detritus northern-boundary
+    time:           bry_time
+    index_code:     idTbry(inorth,iRPOC)
+    type:           nulvar
+    add_offset:     0.0d0
+    scale:          1.0d0
+
+  - variable:       RPOM_east                                        # Input
+    standard_name:  mole_concentration_of_river_detritus_expressed_as_carbon_in_sea_water
+    long_name:      river carbon-detritus eastern boundary condition
+    units:          millimole_carbon meter-3                         # [millimole/m3]
+    field:          river C-detritus eastern-boundary
+    time:           bry_time
+    index_code:     idTbry(ieast,iRPOM)
+    type:           nulvar
+    add_offset:     0.0d0
+    scale:          1.0d0
+
+  - variable:       RPOM_west                                        # Input
+    standard_name:  mole_concentration_of_river_detritus_expressed_as_carbon_in_sea_water
+    long_name:      river carbon-detritus western boundary condition
+    units:          millimole_carbon meter-3                         # [millimole/m3]
+    field:          river C-detritus western-boundary
+    time:           bry_time
+    index_code:     idTbry(iwest,iRPOM)
+    type:           nulvar
+    add_offset:     0.0d0
+    scale:          1.0d0
+
+  - variable:       RPOM_south                                       # Input
+    standard_name:  mole_concentration_of_river_detritus_expressed_as_carbon_in_sea_water
+    long_name:      river carbon-detritus southern boundary condition
+    units:          millimole_carbon meter-3                         # [millimole/m3]
+    field:          river C-detritus southern-boundary
+    time:           bry_time
+    index_code:     idTbry(isouth,iRPOM)
+    type:           nulvar
+    add_offset:     0.0d0
+    scale:          1.0d0
+
+  - variable:       RPOM_north                                       # Input
+    standard_name:  mole_concentration_of_river_detritus_expressed_as_carbon_in_sea_water
+    long_name:      river carbon-detritus northern boundary condition
+    units:          millimole_carbon meter-3                         # [millimole/m3]
+    field:          river C-detritus northern-boundary
+    time:           bry_time
+    index_code:     idTbry(inorth,iRPOM)
+    type:           nulvar
+    add_offset:     0.0d0
+    scale:          1.0d0
+
+  - variable:       RDOM_east                                        # Input
+    standard_name:  mole_concentration_of_river_detritus_expressed_as_carbon_in_sea_water
+    long_name:      river carbon-detritus eastern boundary condition
+    units:          millimole_carbon meter-3                         # [millimole/m3]
+    field:          river C-detritus eastern-boundary
+    time:           bry_time
+    index_code:     idTbry(ieast,iRDOM)
+    type:           nulvar
+    add_offset:     0.0d0
+    scale:          1.0d0
+
+  - variable:       RDOM_west                                        # Input
+    standard_name:  mole_concentration_of_river_detritus_expressed_as_carbon_in_sea_water
+    long_name:      river carbon-detritus western boundary condition
+    units:          millimole_carbon meter-3                         # [millimole/m3]
+    field:          river C-detritus western-boundary
+    time:           bry_time
+    index_code:     idTbry(iwest,iRDOM)
+    type:           nulvar
+    add_offset:     0.0d0
+    scale:          1.0d0
+
+  - variable:       RDOM_south                                       # Input
+    standard_name:  mole_concentration_of_river_detritus_expressed_as_carbon_in_sea_water
+    long_name:      river carbon-detritus southern boundary condition
+    units:          millimole_carbon meter-3                         # [millimole/m3]
+    field:          river C-detritus southern-boundary
+    time:           bry_time
+    index_code:     idTbry(isouth,iRDOM)
+    type:           nulvar
+    add_offset:     0.0d0
+    scale:          1.0d0
+
+  - variable:       RDOM_north                                       # Input
+    standard_name:  mole_concentration_of_river_detritus_expressed_as_carbon_in_sea_water
+    long_name:      river carbon-detritus northern boundary condition
+    units:          millimole_carbon meter-3                         # [millimole/m3]
+    field:          river C-detritus northern-boundary
+    time:           bry_time
+    index_code:     idTbry(inorth,iRDOM)
+    type:           nulvar
+    add_offset:     0.0d0
+    scale:          1.0d0
   ########################
   ###  Red Tide Model  ###
   ########################

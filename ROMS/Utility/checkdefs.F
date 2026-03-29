@@ -2421,12 +2421,19 @@
       is=LEN_TRIM(Coptions)+1
       Coptions(is:is+16)=' REGRID_SHAPIRO,'
 #endif
-#if defined RIVER_DON && defined BIO_FENNEL
+#if defined RIVER_DOM && defined BIO_FENNEL
 !
-      IF (Master) WRITE (stdout,20) 'RIVER_DON',                        &
-     &   'DON non-skinking source from rivers'
+      IF (Master) WRITE (stdout,20) 'RIVER_DOM',                        &
+     &   'RIVER_DOM non-skinking source from rivers'
       is=LEN_TRIM(Coptions)+1
-      Coptions(is:is+5)=' RIVER_DON,'
+      Coptions(is:is+5)=' RIVER_DOM,'
+#endif
+#if defined RIVER_POM && defined BIO_FENNEL
+!
+      IF (Master) WRITE (stdout,20) 'RIVER_POM',                        &
+     &   'RIVER_POM non-skinking source from rivers'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+5)=' RIVER_POM,'
 #endif
 #ifdef ROMS_STDOUT
 !

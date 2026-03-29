@@ -204,3 +204,62 @@
      &                          pCO2air(ng), (/0/), (/0/),              &
      &                          pioFile = pioFile)
       IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+
+      CALL pio_netcdf_put_fvar (ng, model, ncname, 'frac_oceSOC',           &
+     &                          frac_oceSOC(ng), (/0/), (/0/),              &
+     &                          pioFile = pioFile)
+      IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+
+#ifdef RIVER_POM && defined RIVER_DOM
+
+     CALL pio_netcdf_put_fvar (ng, model, ncname, 'RD_RRN',                    &
+     &                      RD_RRN(ng), (/0/), (/0/),                      &
+     &                      pioFile = pioFile)
+      IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+
+     CALL pio_netcdf_put_fvar (ng, model, ncname, 'RP_RRN',               &
+     &                      RP_RRN(ng), (/0/), (/0/),                  &
+     &                      pioFile = pioFile)
+      IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+
+     CALL pio_netcdf_put_fvar (ng, model, ncname, 'RD_RRC',               &
+     &                      RD_RRC(ng), (/0/), (/0/),                  &
+     &                      pioFile = pioFile)
+      IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+
+     CALL pio_netcdf_put_fvar (ng, model, ncname, 'RP_RRC',               &
+     &                      RP_RRC(ng), (/0/), (/0/),                  &
+     &                      pioFile = pioFile)
+      IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+
+     CALL pio_netcdf_put_fvar (ng, model, ncname, 'wRPOM',               &
+     &                      wRPOM(ng), (/0/), (/0/),                  &
+     &                      pioFile = pioFile)
+      IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+
+     CALL pio_netcdf_put_fvar (ng, model, ncname, 'ROM_CN',               &
+     &                      ROM_CN(ng), (/0/), (/0/),                  &
+     &                      pioFile = pioFile)
+      IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+
+     CALL pio_netcdf_put_fvar (ng, model, ncname, 'RPOM_PN',               &
+     &                      RPOM_PN(ng), (/0/), (/0/),                  &
+     &                      pioFile = pioFile)
+      IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+
+     CALL pio_netcdf_put_fvar (ng, model, ncname, 'RDOM_PN',               &
+     &                      RDOM_PN(ng), (/0/), (/0/),                  &
+     &                      pioFile = pioFile)
+      IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+
+     CALL pio_netcdf_put_fvar (ng, model, ncname, 'rOxNH4_ROM',               &
+     &                      rOxNH4_ROM(ng), (/0/), (/0/),                  &
+     &                      pioFile = pioFile)
+      IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+      
+     CALL pio_netcdf_put_fvar (ng, model, ncname, 'frac_rivSOC',               &
+     &                      frac_rivSOC(ng), (/0/), (/0/),                  &
+     &                      pioFile = pioFile)
+      IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+
+#endif

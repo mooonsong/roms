@@ -52,12 +52,20 @@
           CASE ('idTvar(iOxyg)')
             idTvar(iOxyg)=varid
 #endif
-#ifdef RIVER_DON
-          CASE ('idTvar(iRDeN)')
-            idTvar(iRDeN)=varid
+#ifdef RIVER_DOM
+          CASE ('idTvar(iRDOM)')
+            idTvar(iRDOM)=varid
 # ifdef CARBON
-          CASE ('idTvar(iRDeC)')
-            idTvar(iRDeC)=varid
+          CASE ('idTvar(iRDOC)')
+            idTvar(iRDOC)=varid
+# endif
+#endif
+#ifdef RIVER_POM
+          CASE ('idTvar(iRPOM)')
+            idTvar(iRPOM)=varid
+# ifdef CARBON
+          CASE ('idTvar(iRPOC)')
+            idTvar(iRPOC)=varid
 # endif
 #endif
 
@@ -100,12 +108,20 @@
           CASE ('idTads(iOxyg)')
             idTads(iOxyg)=varid
 # endif
-# ifdef RIVER_DON
-          CASE ('idTads(iRDeN)')
-            idTads(iRDeN)=varid
+# ifdef RIVER_DOM
+          CASE ('idTads(iRDOM)')
+            idTads(iRDOM)=varid
 #  ifdef CARBON
-          CASE ('idTads(iRDeC)')
-            idTads(iRDeC)=varid
+          CASE ('idTads(iRDOC)')
+            idTads(iRDOC)=varid
+#  endif
+# endif
+# ifdef RIVER_POM
+          CASE ('idTads(iRPOM)')
+            idTads(iRPOM)=varid
+#  ifdef CARBON
+          CASE ('idTads(iRPOC)')
+            idTads(iRPOC)=varid
 #  endif
 # endif
 #endif
@@ -234,24 +250,44 @@
           CASE ('idTbry(inorth,iOxyg)')
             idTbry(inorth,iOxyg)=varid
 #endif
-#ifdef RIVER_DON
-          CASE ('idTbry(iwest,iRDeN)')
-            idTbry(iwest,iRDeN)=varid
-          CASE ('idTbry(ieast,iRDeN)')
-            idTbry(ieast,iRDeN)=varid
-          CASE ('idTbry(isouth,iRDeN)')
-            idTbry(isouth,iRDeN)=varid
-          CASE ('idTbry(inorth,iRDeN)')
-            idTbry(inorth,iRDeN)=varid
+#ifdef RIVER_DOM
+          CASE ('idTbry(iwest,iRDOM)')
+            idTbry(iwest,iRDOM)=varid
+          CASE ('idTbry(ieast,iRDOM)')
+            idTbry(ieast,iRDOM)=varid
+          CASE ('idTbry(isouth,iRDOM)')
+            idTbry(isouth,iRDOM)=varid
+          CASE ('idTbry(inorth,iRDOM)')
+            idTbry(inorth,iRDOM)=varid
 # ifdef CARBON
-          CASE ('idTbry(iwest,iRDeC)')
-            idTbry(iwest,iRDeC)=varid
-          CASE ('idTbry(ieast,iRDeC)')
-            idTbry(ieast,iRDeC)=varid
-          CASE ('idTbry(isouth,iRDeC)')
-            idTbry(isouth,iRDeC)=varid
-          CASE ('idTbry(inorth,iRDeC)')
-            idTbry(inorth,iRDeC)=varid
+          CASE ('idTbry(iwest,iRDOC)')
+            idTbry(iwest,iRDOC)=varid
+          CASE ('idTbry(ieast,iRDOC)')
+            idTbry(ieast,iRDOC)=varid
+          CASE ('idTbry(isouth,iRDOC)')
+            idTbry(isouth,iRDOC)=varid
+          CASE ('idTbry(inorth,iRDOC)')
+            idTbry(inorth,iRDOC)=varid
+# endif
+#endif
+#ifdef RIVER_POM
+          CASE ('idTbry(iwest,iRPOM)')
+            idTbry(iwest,iRPOM)=varid
+          CASE ('idTbry(ieast,iRPOM)')
+            idTbry(ieast,iRPOM)=varid
+          CASE ('idTbry(isouth,iRPOM)')
+            idTbry(isouth,iRPOM)=varid
+          CASE ('idTbry(inorth,iRPOM)')
+            idTbry(inorth,iRPOM)=varid
+# ifdef CARBON
+          CASE ('idTbry(iwest,iRPOC)')
+            idTbry(iwest,iRPOC)=varid
+          CASE ('idTbry(ieast,iRPOC)')
+            idTbry(ieast,iRPOC)=varid
+          CASE ('idTbry(isouth,iRPOC)')
+            idTbry(isouth,iRPOC)=varid
+          CASE ('idTbry(inorth,iRPOC)')
+            idTbry(inorth,iRPOC)=varid
 # endif
 #endif
 
@@ -291,12 +327,20 @@
           CASE ('idRtrc(iOxyg)')
             idRtrc(iOxyg)=varid
 #endif
-#ifdef RIVER_DON
-          CASE ('idRtrc(iRDeN)')
-            idRtrc(iRDeN)=varid
+#ifdef RIVER_DOM
+          CASE ('idRtrc(iRDOM)')
+            idRtrc(iRDOM)=varid
 # ifdef CARBON
-          CASE ('idRtrc(iRDeC)')
-            idRtrc(iRDeC)=varid
+          CASE ('idRtrc(iRDOC)')
+            idRtrc(iRDOC)=varid
+# endif
+#endif
+#ifdef RIVER_POM
+          CASE ('idRtrc(iRPOM)')
+            idRtrc(iRPOM)=varid
+# ifdef CARBON
+          CASE ('idRtrc(iRPOC)')
+            idRtrc(iRPOC)=varid
 # endif
 #endif
 

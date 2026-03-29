@@ -151,6 +151,12 @@
 #ifdef OXYGEN
             t(i,j,k,1,iOxyg)=10.0_r8/0.02241_r8
 #endif
+#ifdef RIVER_POM
+            t(i,j,k,1,iRPOM)=0.01_r8
+#endif
+#ifdef RIVER_DOM
+            t(i,j,k,1,iRDOM)=0.01_r8
+#endif
           END DO
         END DO
       END DO

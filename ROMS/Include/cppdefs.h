@@ -461,7 +461,8 @@
 ** PO4                     if phytoplanckton growth limitef by Phosphorus    **
 ** RW14_C02_SC             if CO2 Schmidt number from Wanninkhof (2014)      **
 ** RW14_OXYGEN_SC          if O2  Schmidt number from Wanninkhof (2014)      **
-** RIVER_DON               if DON non-sinking source from rivers             **
+** RIVER_DOM               if DON non-sinking source from rivers             **
+** RIVER_POM               if POM sinking source from rivers                 **
 ** TALK_NONCONSERV         if nonconservative computation of alkalinity      **
 **                                                                           **
 ** Feng et al. (2015) Estuarine Carbon Biogeochemisty (ECB) model OPTIONS:   **

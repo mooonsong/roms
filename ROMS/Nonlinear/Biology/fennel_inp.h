@@ -141,6 +141,30 @@
               Npts=load_r(Nval, Rval, Ngrids, wSDet)
             CASE ('pCO2air')
               Npts=load_r(Nval, Rval, Ngrids, pCO2air)
+            CASE ('frac_oceSOC')
+              Npts=load_r(Nval, Rval, Ngrids, frac_oceSOC)
+#ifdef RIVER_POM && defined RIVER_DOM
+            CASE ('RD_RRN')
+              Npts=load_r(Nval, Rval, Ngrids, RD_RRN)
+            CASE ('RP_RRN')
+              Npts=load_r(Nval, Rval, Ngrids, RP_RRN)
+            CASE ('RD_RRC')
+              Npts=load_r(Nval, Rval, Ngrids, RD_RRC)
+            CASE ('RP_RRC')
+              Npts=load_r(Nval, Rval, Ngrids, RP_RRC)
+            CASE ('wRPOM')
+              Npts=load_r(Nval, Rval, Ngrids, wRPOM)
+            CASE ('ROM_CN')
+              Npts=load_r(Nval, Rval, Ngrids, ROM_CN)
+            CASE ('RPOM_PN')
+              Npts=load_r(Nval, Rval, Ngrids, RPOM_PN)
+            CASE ('RDOM_PN')
+              Npts=load_r(Nval, Rval, Ngrids, RDOM_PN)
+            CASE ('rOxNH4_ROM')
+              Npts=load_r(Nval, Rval, Ngrids, rOxNH4_ROM)
+            CASE ('frac_rivSOC')
+              Npts=load_r(Nval, Rval, Ngrids, frac_rivSOC)
+#endif
             CASE ('TNU2')
               Npts=load_r(Nval, Rval, NBT, Ngrids, Rbio)
               DO ng=1,Ngrids
@@ -706,6 +730,35 @@
      &            'Small detritus sinking velocity (m/day).'
             WRITE (out,80) pCO2air(ng), 'pCO2air',                      &
      &            'CO2 partial pressure in air (ppm by volume).'
+            WRITE (out,80) frac_oceSOC(ng), 'frac_oceSOC',              &
+     &            'Fraction of ocean OM  degraded to become SOC'
+#ifdef RIVER_POM && defined RIVER_DOM
+            WRITE (out,80) RD_RRN(ng), 'RD_RRN',                       &
+     &            'River DOM remineralization rate (N) (day-1).'
+            WRITE (out,80) RP_RRN(ng), 'RP_RRN',                       &
+     &            'River POM remineralization rate (N) (day-1).'     
+            WRITE (out,80) RD_RRC(ng), 'RD_RRC',                       &
+     &            'River DOC remineralization rate (C) (day-1).'
+            WRITE (out,80) RP_RRC(ng), 'RP_RRC',                       &
+     &            'River POC remineralization rate (C) (day-1).'          
+            WRITE (out,80) wRPOM(ng), 'wRPOM',                         &
+     &            'River POM sinking velocity (m/day).' 
+            WRITE (out,90) ROM_CN(ng), 'ROM_CN',                       &
+     &            'River organic matter Carbon:Nitrogen ratio',         &
+     &            '(mol_C/mol_N).'
+            WRITE (out,90) RPOM_PN(ng), 'RPOM_PN',                     &
+     &            'River particulae organic matter P:N ratio',          &
+     &            '(mol_P/mol_N).'
+            WRITE (out,90) RDOM_PN(ng), 'RDOM_PN',                     &
+     &            'River dissolve organic matter P:N ratio',            &
+     &            '(mol_P/mol_N).' 
+            WRITE (out,90) rOxNH4_ROM(ng), 'rOxNH4_ROM',               &
+     &            'ratio of NH4 produced per mol of ROM remineralized', &
+     &            '(nondimensional).'    
+            WRITE (out,90) frac_rivSOC(ng), 'frac_rivSOC',             &
+     &            'Fraction of river OM  degraded to become SOC',       &
+     &            '(nondimensional).'                  
+#  endif    
 #ifdef TS_DIF2
             DO itrc=1,NBT
               i=idbio(itrc)

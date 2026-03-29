@@ -314,3 +314,95 @@
      &               1, (/0/), Aval, Vinfo, ncname,                     &
      &               SetParAccess = .FALSE.)
       IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+
+      Vinfo( 1)='frac_oceSOC'
+      Vinfo( 2)='Fraction of ocean OM  degraded to become SOC'
+      Vinfo( 3)='unitless'
+      status=def_var(ng, model, ncid, varid, NF_TYPE,                   &
+     &               1, (/0/), Aval, Vinfo, ncname,                     &
+     &               SetParAccess = .FALSE.)
+      IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+
+#ifdef RIVER_POM && defined RIVER_DOM
+
+      Vinfo( 1)='RD_RRN'
+      Vinfo( 2)='River DOM remineralization rate (in terms of N)'
+      Vinfo( 3)='day-1'
+      status=def_var(ng, model, ncid, varid, NF_TYPE,                   &
+     &               1, (/0/), Aval, Vinfo, ncname,                     &
+     &               SetParAccess = .FALSE.)
+      IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+      
+      Vinfo( 1)='RP_RRN'
+      Vinfo( 2)='River POM remineralization rate (in terms of N)'
+      Vinfo( 3)='day-1'
+      status=def_var(ng, model, ncid, varid, NF_TYPE,                   &
+     &               1, (/0/), Aval, Vinfo, ncname,                     &
+     &               SetParAccess = .FALSE.)
+      IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+
+      Vinfo( 1)='RD_RRC'
+      Vinfo( 2)='River DOC remineralization rate (in terms of C)'
+      Vinfo( 3)='day-1'
+      status=def_var(ng, model, ncid, varid, NF_TYPE,                   &
+     &               1, (/0/), Aval, Vinfo, ncname,                     &
+     &               SetParAccess = .FALSE.)
+      IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+      
+      Vinfo( 1)='RP_RRC'
+      Vinfo( 2)='River POC remineralization rate (in terms of C)'
+      Vinfo( 3)='day-1'
+      status=def_var(ng, model, ncid, varid, NF_TYPE,                   &
+     &               1, (/0/), Aval, Vinfo, ncname,                     &
+     &               SetParAccess = .FALSE.)
+      IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+                  
+      Vinfo( 1)='wRPOM'
+      Vinfo( 2)='vertical sinking velocity for river POM'
+      Vinfo( 3)='meter day-1'
+      status=def_var(ng, model, ncid, varid, NF_TYPE,                   &
+     &               1, (/0/), Aval, Vinfo, ncname,                     &
+     &               SetParAccess = .FALSE.)
+      IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+      
+      Vinfo( 1)='ROM_CN'
+      Vinfo( 2)='River organic matter Carbon:Nitrogen ratio'
+      Vinfo( 3)='mole_C/mole_N'
+      status=def_var(ng, model, ncid, varid, NF_TYPE,                   &
+     &               1, (/0/), Aval, Vinfo, ncname,                     &
+     &               SetParAccess = .FALSE.)
+      IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN  
+
+      Vinfo( 1)='RPOM_PN'
+      Vinfo( 2)='River particulate organic matter Phosphorus:Nitrogen ratio'
+      Vinfo( 3)='mole_P/mole_N'
+      status=def_var(ng, model, ncid, varid, NF_TYPE,                   &
+     &               1, (/0/), Aval, Vinfo, ncname,                     &
+     &               SetParAccess = .FALSE.)
+      IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+
+      Vinfo( 1)='RDOM_PN'
+      Vinfo( 2)='River dissolve organic matter Phosphorus:Nitrogen ratio'
+      Vinfo( 3)='mole_P/mole_N'
+      status=def_var(ng, model, ncid, varid, NF_TYPE,                   &
+     &               1, (/0/), Aval, Vinfo, ncname,                     &
+     &               SetParAccess = .FALSE.)
+      IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+
+      Vinfo( 1)='rOxNH4_ROM'
+      Vinfo( 2)='ratio of NH4 produced per mol of river OM remineralized'
+      Vinfo( 3)=''
+      status=def_var(ng, model, ncid, varid, NF_TYPE,                   &
+     &               1, (/0/), Aval, Vinfo, ncname,                     &
+     &               SetParAccess = .FALSE.)
+      IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN        
+
+      Vinfo( 1)='frac_rivSOC'
+      Vinfo( 2)='Fraction of river OM  degraded to become SOC'
+      Vinfo( 3)=''
+      status=def_var(ng, model, ncid, varid, NF_TYPE,                   &
+     &               1, (/0/), Aval, Vinfo, ncname,                     &
+     &               SetParAccess = .FALSE.)
+      IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+
+#endif
