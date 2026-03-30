@@ -524,12 +524,12 @@
         allocate ( frac_oceSOC(Ngrids) )
         Dmem(1)=Dmem(1)+REAL(Ngrids,r8)
       END IF
-      
+
+#ifdef RIVER_POM && defined RIVER_DOM
       IF (.not.allocated(ROM_CN)) THEN
         allocate ( ROM_CN(Ngrids) )
         Dmem(1)=Dmem(1)+REAL(Ngrids,r8)
       END IF
-#ifdef RIVER_POM && defined RIVER_DOM
       IF (.not.allocated(RD_RRN)) THEN
         allocate ( RD_RRN(Ngrids) )
         Dmem(1)=Dmem(1)+REAL(Ngrids,r8)

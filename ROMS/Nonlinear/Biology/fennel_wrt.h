@@ -209,12 +209,6 @@
      &                      frac_oceSOC(ng), (/0/), (/0/),                  &
      &                      ncid = ncid)
       IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
-
-     CALL netcdf_put_fvar (ng, model, ncname, 'ROM_CN',               &
-     &                      ROM_CN(ng), (/0/), (/0/),                  &
-     &                      ncid = ncid)
-      IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
-
       
 #ifdef RIVER_POM
 
@@ -274,22 +268,9 @@
 
 #ifdef RIVER_POM && defined RIVER_DOM
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+     CALL netcdf_put_fvar (ng, model, ncname, 'ROM_CN',               &
+     &                      ROM_CN(ng), (/0/), (/0/),                  &
+     &                      ncid = ncid)
+      IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
 
 #endif
