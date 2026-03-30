@@ -571,12 +571,14 @@
       idsink(5)=iSDeC
       idsink(6)=iLDeC
 #endif
-#ifdef RIVER_POM
-      idsink(7)=iRPOM
-# ifdef CARBON
-      idsink(8)=iRPOC
-# endif
-#endif 
+#ifdef RIVER_POM  
+# ifdef CARBON  
+      idsink(7)=iRPOM  
+      idsink(8)=iRPOC  
+# else  
+      idsink(5)=iRPOM  
+# endif  
+#endif   
 
 !
 !  Set vertical sinking velocity vector in the same order as the
@@ -590,12 +592,14 @@
       Wbio(5)=wSDet(ng)               ! small Carbon-detritus
       Wbio(6)=wLDet(ng)               ! large Carbon-detritus
 #endif
-#ifdef RIVER_POM
-      Wbio(7)=wRPOM(ng)               ! river POM
-# ifdef CARBON
-      Wbio(8)=wRPOM(ng)               ! river POC
-# endif
-#endif
+#ifdef RIVER_POM  
+# ifdef CARBON  
+      Wbio(7)=wRPOM(ng)               ! river POM  
+      Wbio(8)=wRPOM(ng)               ! river POC  
+# else  
+      Wbio(5)=wRPOM(ng)               ! river POM  
+# endif  
+#endif  
 
 !
 !  Compute inverse thickness to avoid repeated divisions.
