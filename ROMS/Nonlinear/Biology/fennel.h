@@ -1754,7 +1754,7 @@
                 cff1_wc=FC(i,0)*Hz_inv(i,1)                          &
      &                 *(1.0_r8-facOxy2*frac_oceSOC(ng))   
                 Bio(i,1,ibio)=Bio(i,1,ibio)+cff1_wc        
-                Bio(i,1,iTIC_)=Bio(i,1,iTIC_)+cff1*PhyCN(ng)
+            !     Bio(i,1,iTIC_)=Bio(i,1,iTIC_)+cff1*PhyCN(ng)
               END DO
             END IF
 
