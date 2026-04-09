@@ -3,7 +3,7 @@
 !
 !git $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2025 The ROMS Group                              !
+!  Copyright (c) 2002-2026 The ROMS Group                              !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.md                                               !
 !=======================================================================
@@ -33,6 +33,7 @@
       implicit none
 !
       PUBLIC :: close_file
+      PUBLIC :: close_forward
       PUBLIC :: close_inp
       PUBLIC :: close_out
 !
@@ -88,6 +89,75 @@
       END SUBROUTINE close_file
 !
 !***********************************************************************
+      SUBROUTINE close_forward
+!***********************************************************************
+!
+!  Local variable declarations.
+!
+      logical :: Lupdate
+!
+      integer :: ng
+!
+      character (len=*), parameter :: MyFile =                          &
+     &  __FILE__//", close_inp"
+!
+      SourceFile=MyFile
+!
+!-----------------------------------------------------------------------
+!  When the split 4D-Var scheme is employed, it is necessary to close
+!  the background forward trajectory, forward fluxes, and quicksave
+!  files if delayed synchronization is enabled for the output NetCDF
+!  files processed by the PIO library. This approach maximizes
+!  performance by retaining data in memory. Subsequently, these files
+!  must be closed and synchronized to disk via PIO_closefile, which
+!  allows the ADM and TLM kernels to access them within the inner loops.
+!-----------------------------------------------------------------------
+!
+!  If appropriate, set switch for updating biology header file global
+!  attribute in output NetCDF files.
+!
+#ifdef BIOLOGY
+      Lupdate=.TRUE.
+#else
+      Lupdate=.FALSE.
+#endif
+!
+!  Close forward trajectory and fluxes files.
+!
+      DO ng=1,Ngrids
+#if defined FORWARD_WRITE
+        IF (FWD(ng)%IOtype.eq.io_nf90) THEN
+          IF ((FWD(ng)%ncid.ne.-1).and.                                 &
+     &        (FWD(ng)%ncid.eq.HIS(ng)%ncid)) THEN
+            FWD(ng)%ncid=-1
+          END IF
+# if defined PIO_LIB && defined DISTRIBUTE
+        ELSE IF (FWD(ng)%IOtype.eq.io_pio) THEN
+          IF ((FWD(ng)%pioFile%fh.ne.-1).and.                           &
+     &        (FWD(ng)%pioFile%fh.eq.HIS(ng)%pioFile%fh)) THEN
+            FWD(ng)%pioFile%fh=-1
+          END IF
+# endif
+        END IF
+        CALL close_file (ng, iNLM, FWD(ng), FWD(ng)%name, Lupdate)
+#endif
+        CALL close_file (ng, iNLM, HIS(ng), HIS(ng)%name, Lupdate)
+        CALL close_file (ng, iNLM, QCK(ng), QCK(ng)%name, Lupdate)
+#ifdef AVERAGES
+        CALL close_file (ng, iNLM, AVG(ng), AVG(ng)%name, Lupdate)
+#endif
+#ifdef DIAGNOSTICS
+        CALL close_file (ng, iNLM, DIA(ng), DIA(ng)%name, Lupdate)
+#endif
+#ifdef GRID_EXTRACT
+        CALL close_file (ng, iNLM, XTR(ng), XTR(ng)%name, Lupdate)
+#endif
+      END DO
+!
+      RETURN
+      END SUBROUTINE close_forward
+!
+!***********************************************************************
       SUBROUTINE close_inp (ng, model)
 !***********************************************************************
 !
@@ -118,7 +188,13 @@
 !  to closed state.
 !
       DO i=1,nFfiles(ng)
-        IF ((FRC(i,ng)%Nfiles.gt.0).and.(FRC(i,ng)%ncid.ne.-1)) THEN
+        IF ((FRC(i,ng)%Nfiles.gt.0).and.(                               &
+# if defined PIO_LIB && defined DISTRIBUTE
+     &      ((FRC(i,ng)%IOtype.eq.io_pio).and.                          &
+     &       (FRC(i,ng)%pioFile%fh.ne.-1)).or.                          &
+# endif
+     &      ((FRC(i,ng)%IOtype.eq.io_nf90).and.                         &
+     &       (FRC(i,ng)%ncid.ne.-1)))) THEN
           Fcount=FRC(i,ng)%Fcount
           CALL close_file (ng, model, FRC(i,ng),                        &
      &                     FRC(i,ng)%files(Fcount), .FALSE.)
@@ -136,7 +212,13 @@
 !
       IF (ObcData(ng)) THEN
         DO i=1,nBCfiles(ng)
-          IF ((BRY(i,ng)%Nfiles.gt.0).and.(BRY(i,ng)%ncid.ne.-1)) THEN
+          IF ((BRY(i,ng)%Nfiles.gt.0).and.(                             &
+# if defined PIO_LIB && defined DISTRIBUTE
+     &        ((BRY(i,ng)%IOtype.eq.io_pio).and.                        &
+     &         (BRY(i,ng)%pioFile%fh.ne.-1)).or.                        &
+# endif
+     &        ((BRY(i,ng)%IOtype.eq.io_nf90).and.                       &
+     &         (BRY(i,ng)%ncid.ne.-1)))) THEN
             Fcount=BRY(i,ng)%Fcount
             CALL close_file (ng, model, BRY(i,ng),                      &
      &                       BRY(i,ng)%files(Fcount), .FALSE.)
@@ -154,7 +236,13 @@
 !
       IF (CLM_FILE(ng)) THEN
         DO i=1,nCLMfiles(ng)
-          IF ((CLM(i,ng)%Nfiles.gt.0).and.(CLM(i,ng)%ncid.ne.-1)) THEN
+          IF ((CLM(i,ng)%Nfiles.gt.0).and.(                             &
+# if defined PIO_LIB && defined DISTRIBUTE
+     &        ((CLM(i,ng)%IOtype.eq.io_pio).and.                        &
+     &         (CLM(i,ng)%pioFile%fh.ne.-1)).or.                        &
+# endif
+     &        ((CLM(i,ng)%IOtype.eq.io_nf90).and.                       &
+     &         (CLM(i,ng)%ncid.ne.-1)))) THEN
             Fcount=CLM(i,ng)%Fcount
             CALL close_file (ng, model, CLM(i,ng),                      &
      &                       CLM(i,ng)%files(Fcount), .FALSE.)
@@ -233,6 +321,11 @@
         END IF
         CALL close_file (ng, iNLM, FWD(ng), FWD(ng)%name, Lupdate)
 #endif
+        CALL close_file (ng, iNLM, RST(ng), RST(ng)%name, Lupdate)
+#if defined FOUR_DVAR || defined ENKF_RESTART || defined VERIFICATION
+        CALL close_file (ng, iNLM, DAI(ng), DAI(ng)%name, Lupdate)
+        CALL close_file (ng, iNLM, DAV(ng), DAV(ng)%name, Lupdate)
+#endif
         CALL close_file (ng, iNLM, HIS(ng), HIS(ng)%name, Lupdate)
         CALL close_file (ng, iNLM, QCK(ng), QCK(ng)%name, Lupdate)
 #ifdef SP4DVAR
@@ -280,6 +373,19 @@
    (defined POSTERIOR_ERROR_F || defined POSTERIOR_ERROR_I)
         CALL close_file (ng, iTLM, ERR(ng), ERR(ng)%name, Lupdate)
 #endif
+#ifdef GRID_EXTRACT
+        CALL close_file (ng, iNLM, XTR(ng), XTR(ng)%name, Lupdate)
+#endif
+!
+!  Close several input files that may be open.
+!
+#ifdef FOUR_DVAR
+        CALL close_file (ng, iNLM, INI(ng), INI(ng)%name, .FALSE.)
+#endif
+        CALL close_file (ng, iNLM, NUD(ng), NUD(ng)%name, .FALSE.)
+        CALL close_file (ng, iNLM, OBS(ng), OBS(ng)%name, .FALSE.)
+        CALL close_file (ng, iNLM, SSF(ng), SSF(ng)%name, .FALSE.)
+        CALL close_file (ng, iNLM, TIDE(ng), TIDE(ng)%name, .FALSE.)
 !
 !  Report number of time records written.
 !
@@ -328,6 +434,18 @@
               WRITE (stdout,20) 'TANGENT', SUM(TLM(ng)%Nrec)
             END IF
           END IF
+
+          IF (associated(ITL(ng)%Nrec)) THEN
+            IF (ANY(ITL(ng)%Nrec.gt.0)) THEN
+              WRITE (stdout,20) 'TLM ITL', SUM(ITL(ng)%Nrec)
+            END IF
+          END IF
+
+          IF (associated(TLF(ng)%Nrec)) THEN
+            IF (ANY(TLF(ng)%Nrec.gt.0)) THEN
+              WRITE (stdout,20) 'TLM TLF', SUM(TLF(ng)%Nrec)
+            END IF
+          END IF
 #endif
 
 #if defined AVERAGES    || \
@@ -354,6 +472,14 @@
           IF (associated(ERR(ng)%Nrec)) THEN
             IF (ANY(ERR(ng)%Nrec.gt.0)) THEN
               WRITE (stdout,20) 'ERROR  ', SUM(ERR(ng)%Nrec)
+            END IF
+          END IF
+#endif
+
+#ifdef GRID_EXTRACT
+          IF (associated(XTR(ng)%Nrec)) THEN
+            IF (ANY(XTR(ng)%Nrec.gt.0)) THEN
+              WRITE (stdout,20) 'EXTRACT', SUM(XTR(ng)%Nrec)
             END IF
           END IF
 #endif
@@ -465,5 +591,5 @@
 !
       RETURN
       END SUBROUTINE close_out
-
+!
       END MODULE close_io_mod

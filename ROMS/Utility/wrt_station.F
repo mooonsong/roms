@@ -4,7 +4,7 @@
 !
 !git $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2025 The ROMS Group                              !
+!  Copyright (c) 2002-2026 The ROMS Group                              !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.md                                               !
 !=======================================================================
@@ -1033,13 +1033,16 @@
     &                            Sout, STA)
       IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
 # endif
+
+# if !(defined OUT_NETCDF4 && defined DELAYED_SYNC_NF90)
 !
 !-----------------------------------------------------------------------
 !  Synchronize stations NetCDF file to disk.
 !-----------------------------------------------------------------------
 !
       CALL netcdf_sync (ng, model, STA(ng)%name, STA(ng)%ncid)
-
+# endif
+!
       RETURN
       END SUBROUTINE wrt_station_nf90
 
@@ -1984,13 +1987,16 @@
     &                           Sout, STA)
       IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
 #  endif
+
+#  ifndef DELAYED_SYNC_PIO
 !
 !-----------------------------------------------------------------------
 !  Synchronize stations NetCDF file to disk.
 !-----------------------------------------------------------------------
 !
       CALL pio_netcdf_sync (ng, model, STA(ng)%name, STA(ng)%pioFile)
-
+#  endif
+!
       RETURN
       END SUBROUTINE wrt_station_pio
 # endif

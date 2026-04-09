@@ -2,7 +2,7 @@
 !
 !git $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2025 The ROMS Group           Paul Budgell       !
+!  Copyright (c) 2002-2026 The ROMS Group           Paul Budgell       !
 !    Licensed under a MIT/X style license           Katherine Hedstrom !
 !    See License_ROMS.md                            Scott M. Durski    !
 !=======================================================================
@@ -123,6 +123,11 @@
       integer :: idW_fr       ! rate of ice accretion by frazil growth
       integer :: idW_io       ! rate of melt/freeze at ice/ocean edge
       integer :: idW_ro       ! rate of melt/freeze runoff into ocean
+      integer :: idEnth       ! ice/brine enthalpy
+      integer :: idUevp       ! EVP ice U-velocity
+      integer :: idVevp       ! EVP ice V-velocity
+      integer :: idQcon       ! ice/snow heat conductivity
+      integer :: idQrhs       ! RHS heat flux over ice/snow
 !
 !  Ice model state prognostic variables indices.
 !
@@ -214,8 +219,8 @@
 !
 !  Ice equations time step (s).
 !
-      integer, allocatable :: dtice(:)          ! viscous
-      integer, allocatable :: dtevp(:)          ! elastic
+      real(r8), allocatable :: dtice(:)         ! viscous
+      real(r8), allocatable :: dtevp(:)         ! elastic
 !
 !  Density parameters (kg/m3).
 !

@@ -5,7 +5,7 @@
 !
 !git $Id$
 !=======================================================================
-!  Copyright (c) 2002-2025 The ROMS Group                              !
+!  Copyright (c) 2002-2026 The ROMS Group                              !
 !    Licensed under a MIT/X style license           W. Paul Budgell    !
 !    See License_ROMS.md                            Katherine Hedstrom !
 !================================================== Hernan G. Arango ===
@@ -104,6 +104,7 @@
           Si(i,j,linew,isHsno)=MAX(Si(i,j,linew,isHsno), 0.0_r8)
           Si(i,j,linew,isHmel)=MAX(Si(i,j,linew,isHmel), 0.0_r8)
           Si(i,j,linew,isTice)=MAX(Si(i,j,linew,isTice),-70.0_r8)
+          Si(i,j,linew,isTice)=MIN(Si(i,j,linew,isTice), 0.0_r8)
           Si(i,j,linew,isIage)=MAX(Si(i,j,linew,isIage), 0.0_r8)
           IF ((Si(i,j,linew,isAice).le.0.0_r8).or.                      &
      &        (Si(i,j,linew,isHice).le.0.0_r8)) THEN

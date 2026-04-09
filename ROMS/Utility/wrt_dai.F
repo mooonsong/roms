@@ -4,7 +4,7 @@
 !
 !git $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2025 The ROMS Group                              !
+!  Copyright (c) 2002-2026 The ROMS Group                              !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.md                                               !
 !=======================================================================
@@ -499,6 +499,8 @@
       END IF
 #  endif
 # endif
+
+# if !(defined OUT_NETCDF4 && defined DELAYED_SYNC_NF90)
 !
 !-----------------------------------------------------------------------
 !  Synchronize restart NetCDF file to disk.
@@ -506,6 +508,7 @@
 !
       CALL netcdf_sync (ng, iNLM, DAI(ng)%name, DAI(ng)%ncid)
       IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+# endif
 !
   10  FORMAT (2x,'WRT_DAI_NF90     - writing DA INI/RST', t42,          &
 # ifdef SOLVE3D
@@ -1017,6 +1020,8 @@
       END IF
 #   endif
 #  endif
+
+#  ifndef DELAYED_SYNC_PIO
 !
 !-----------------------------------------------------------------------
 !  Synchronize restart NetCDF file to disk.
@@ -1024,6 +1029,7 @@
 !
       CALL pio_netcdf_sync (ng, iNLM, DAI(ng)%name, DAI(ng)%pioFile)
       IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+#  endif
 !
   10  FORMAT (2x,'WRT_DAI_PIO      - writing DA INI/RST', t42,          &
 #  ifdef SOLVE3D

@@ -3,7 +3,7 @@
 !
 !git $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2025 The ROMS Group                              !
+!  Copyright (c) 2002-2026 The ROMS Group                              !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.md                                               !
 !=======================================================================
@@ -546,6 +546,13 @@
         logical, allocatable :: LuvSrc(:)            ! momentum
         logical, allocatable :: LwSrc(:)             ! mass
         logical, allocatable :: LtracerSrc(:,:)      ! tracers
+!
+!  Initialize NetCDF-4/HDF5 deflate (file compression) parameters. They
+!  overwritten with standard input values.
+!
+        integer :: shuffle = 1
+        integer :: deflate = 1
+        integer :: deflate_level = 1
 !
 !  Execution termination flag.
 !

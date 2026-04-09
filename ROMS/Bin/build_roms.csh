@@ -2,7 +2,7 @@
 #
 # git $Id$
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-# Copyright (c) 2002-2025 The ROMS Group                                :::
+# Copyright (c) 2002-2026 The ROMS Group                                :::
 #   Licensed under a MIT/X style license                                :::
 #   See License_ROMS.md                                                 :::
 #::::::::::::::::::::::::::::::::::::::::::::::::::::: Hernan G. Arango :::
@@ -242,6 +242,7 @@ endif
 if ( $g_flags == 1 ) then
  setenv USE_DEBUG           on          # use Fortran debugging flags
 endif
+
  setenv USE_LARGE           on          # activate 64-bit compilation
 
 #--------------------------------------------------------------------------

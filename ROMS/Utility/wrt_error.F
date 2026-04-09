@@ -5,7 +5,7 @@
 !
 !git $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2025 The ROMS Group                              !
+!  Copyright (c) 2002-2026 The ROMS Group                              !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.md                                               !
 !=======================================================================
@@ -575,6 +575,8 @@
         RETURN
       END IF
 # endif
+
+# if !(defined OUT_NETCDF4 && defined DELAYED_SYNC_NF90)
 !
 !-----------------------------------------------------------------------
 !  Synchronize posterior error covariance NetCDF file to disk to allow
@@ -583,6 +585,7 @@
 !
       CALL netcdf_sync (ng, iTLM, ERR(ng)%name, ERR(ng)%ncid)
       IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+# endif
 !
   10  FORMAT (2x,'WRT_ERROR_NF90   - writing error', t42,               &
 #  ifdef SOLVE3D
@@ -730,18 +733,12 @@
 !
       IF (ANY(Lobc(:,isFsur,ng))) THEN
         scale=1.0_dp
-        IF (ERR(ng)%pioVar(idSbry(isFsur))%dkind.eq.PIO_double) THEN
-          ioDesc => ioDesc_dp_r2dobc(ng)
-        ELSE
-          ioDesc => ioDesc_sp_r2dobc(ng)
-        END IF
 !
         status=nf_fwrite2d_bry (ng, iTLM, ERR(ng)%name,                 &
      &                          ERR(ng)%pioFile,                        &
      &                          Vname(1,idSbry(isFsur)),                &
      &                          ERR(ng)%pioVar(idSbry(isFsur)),         &
      &                          ERR(ng)%Rindex,                         &
-     &                          ioDesc,                                 &
      &                          LBij, UBij, Nbrec(ng), scale,           &
      &                          BOUNDARY(ng) % tl_zeta_obc(LBij:,:,:,   &
      &                                                     kout))
@@ -790,18 +787,12 @@
 !
       IF (ANY(Lobc(:,isUbar,ng))) THEN
         scale=1.0_dp
-        IF (ERR(ng)%pioVar(idSbry(isUbar))%dkind.eq.PIO_double) THEN
-          ioDesc => ioDesc_dp_u2dobc(ng)
-        ELSE
-          ioDesc => ioDesc_sp_u2dobc(ng)
-        END IF
 !
         status=nf_fwrite2d_bry (ng, iTLM, ERR(ng)%name,                 &
      &                          ERR(ng)%pioFile,                        &
      &                          Vname(1,idSbry(isUbar)),                &
      &                          ERR(ng)%pioVar(idSbry(isUbar)),         &
      &                          ERR(ng)%Rindex,                         &
-     &                          ioDesc,                                 &
      &                          LBij, UBij, Nbrec(ng), scale,           &
      &                          BOUNDARY(ng) % tl_ubar_obc(LBij:,:,:,   &
      &                                                     kout))
@@ -850,18 +841,12 @@
 !
       IF (ANY(Lobc(:,isVbar,ng))) THEN
         scale=1.0_dp
-        IF (ERR(ng)%pioVar(idSbry(isVbar))%dkind.eq.PIO_double) THEN
-          ioDesc => ioDesc_dp_v2dobc(ng)
-        ELSE
-          ioDesc => ioDesc_sp_v2dobc(ng)
-        END IF
 !
         status=nf_fwrite2d_bry (ng, iTLM, ERR(ng)%name,                 &
      &                          ERR(ng)%pioFile,                        &
      &                          Vname(1,idSbry(isVbar)),                &
      &                          ERR(ng)%pioVar(idSbry(isVbar)),         &
      &                          ERR(ng)%Rindex,                         &
-     &                          ioDesc,                                 &
      &                          LBij, UBij, Nbrec(ng), scale,           &
      &                          BOUNDARY(ng) % tl_vbar_obc(LBij:,:,:,   &
      &                                                     kout))
@@ -912,18 +897,12 @@
 !
       IF (ANY(Lobc(:,isUvel,ng))) THEN
         scale=1.0_dp
-        IF (ERR(ng)%pioVar(idSbry(isUvel))%dkind.eq.PIO_double) THEN
-          ioDesc => ioDesc_dp_u3dobc(ng)
-        ELSE
-          ioDesc => ioDesc_sp_u3dobc(ng)
-        END IF
 !
         status=nf_fwrite3d_bry (ng, iTLM, ERR(ng)%name,                 &
      &                          ERR(ng)%pioFile,                        &
      &                          Vname(1,idSbry(isUvel)),                &
      &                          ERR(ng)%pioVar(idSbry(isUvel)),         &
      &                          ERR(ng)%Rindex,                         &
-     &                          ioDesc,                                 &
      &                          LBij, UBij, 1, N(ng), Nbrec(ng), scale, &
      &                          BOUNDARY(ng) % tl_u_obc(LBij:,:,:,:,    &
      &                                                  nout))
@@ -972,18 +951,12 @@
 !
       IF (ANY(Lobc(:,isVvel,ng))) THEN
         scale=1.0_dp
-        IF (ERR(ng)%pioVar(idSbry(isVvel))%dkind.eq.PIO_double) THEN
-          ioDesc => ioDesc_dp_v3dobc(ng)
-        ELSE
-          ioDesc => ioDesc_sp_v3dobc(ng)
-        END IF
 !
         status=nf_fwrite3d_bry (ng, iTLM, ERR(ng)%name,                 &
      &                          ERR(ng)%pioFile,                        &
      &                          Vname(1,idSbry(isVvel)),                &
      &                          ERR(ng)%pioVar(idSbry(isVvel)),         &
      &                          ERR(ng)%Rindex,                         &
-     &                          ioDesc,                                 &
      &                          LBij, UBij, 1, N(ng), Nbrec(ng), scale, &
      &                          BOUNDARY(ng) % tl_v_obc(LBij:,:,:,:,    &
      &                                                  nout))
@@ -1037,18 +1010,12 @@
         IF (ANY(Lobc(:,isTvar(itrc),ng))) THEN
           scale=1.0_dp
           ifield=idSbry(isTvar(itrc))
-          IF (ERR(ng)%pioVar(ifield)%dkind.eq.PIO_double) THEN
-            ioDesc => ioDesc_dp_r3dobc(ng)
-          ELSE
-            ioDesc => ioDesc_sp_r3dobc(ng)
-          END IF
 !
           status=nf_fwrite3d_bry (ng, iTLM, ERR(ng)%name,               &
      &                            ERR(ng)%pioFile,                      &
      &                            Vname(1,ifield),                      &
      &                            ERR(ng)%pioVar(ifield),               &
      &                            ERR(ng)%Rindex,                       &
-     &                            ioDesc,                               &
      &                            LBij, UBij, 1, N(ng), Nbrec(ng),      &
      &                            scale,                                &
      &                            BOUNDARY(ng) % tl_t_obc(LBij:,:,:,:,  &
@@ -1160,6 +1127,8 @@
         RETURN
       END IF
 #  endif
+
+#  ifndef DELAYED_SYNC_PIO
 !
 !-----------------------------------------------------------------------
 !  Synchronize posterior error covariance NetCDF file to disk to allow
@@ -1168,6 +1137,7 @@
 !
       CALL pio_netcdf_sync (ng, iTLM, ERR(ng)%name, ERR(ng)%pioFile)
       IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+#  endif
 !
   10  FORMAT (2x,'WRT_ERROR_PIO    - writing error', t42,               &
 #  ifdef SOLVE3D

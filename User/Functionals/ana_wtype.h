@@ -2,7 +2,7 @@
 !
 !! git $Id$
 !!======================================================================
-!! Copyright (c) 2002-2025 The ROMS Group                              !
+!! Copyright (c) 2002-2026 The ROMS Group                              !
 !!   Licensed under a MIT/X style license                              !
 !!   See License_ROMS.md                                               !
 !=======================================================================
@@ -96,11 +96,11 @@
       integer, intent(in) :: IminS, ImaxS, JminS, JmaxS
 !
 #ifdef ASSUMED_SHAPE
-      real(r8), intent(in)  :: h(LBi:,LBj:)
-      real(r8), intent(out) :: Jwtype(LBi:,LBj:)
+      integer, intent(out) :: Jwtype(LBi:,LBj:)
+      real(r8), intent(in) :: h(LBi:,LBj:)
 #else
-      real(r8), intent(in)  :: h(LBi:UBi,LBj:UBj)
-      real(r8), intent(out) :: Jwtype(LBi:UBi,LBj:UBj)
+      integer, intent(out) :: Jwtype(LBi:UBi,LBj:UBj)
+      real(r8), intent(in) :: h(LBi:UBi,LBj:UBj)
 #endif
 !
 !  Local variable declarations.

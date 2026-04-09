@@ -7,7 +7,7 @@
 !
 !git $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2025 The ROMS Group                              !
+!  Copyright (c) 2002-2026 The ROMS Group                              !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.md                                               !
 !=======================================================================
@@ -555,6 +555,7 @@
         RETURN
       END IF
 # endif
+# if !(defined OUT_NETCDF4 && defined DELAYED_SYNC_NF90)
 !
 !-----------------------------------------------------------------------
 !  Synchronize Hessian eigenvectors NetCDF file to disk to allow other
@@ -563,6 +564,7 @@
 !
       CALL netcdf_sync (ng, iADM, HSS(ng)%name, HSS(ng)%ncid)
       IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+# endif
 !
   10  FORMAT (2x,'WRT_HESSIAN_NF90 - writing Hessian', t42,             &
 # ifdef SOLVE3D
@@ -690,18 +692,11 @@
 !
       IF (ANY(Lobc(:,isFsur,ng))) THEN
         scale=1.0_dp
-        IF (HSS(ng)%pioVar(idSbry(isFsur))%dkind.eq.PIO_double) THEN
-          ioDesc => ioDesc_dp_r2dobc(ng)
-        ELSE
-          ioDesc => ioDesc_sp_r2dobc(ng)
-        END IF
-!
         status=nf_fwrite2d_bry (ng, iADM, HSS(ng)%name,                 &
      &                          HSS(ng)%pioFile,                        &
      &                          Vname(1,idSbry(isFsur)),                &
      &                          HSS(ng)%pioVar(idSbry(isFsur)),         &
      &                          HSS(ng)%Rindex,                         &
-     &                          ioDesc,                                 &
      &                          LBij, UBij, Nbrec(ng), scale,           &
      &                          BOUNDARY(ng) % ad_zeta_obc(LBij:,:,:,   &
      &                                                     kout))
@@ -750,12 +745,6 @@
 !
       IF (ANY(Lobc(:,isUbar,ng))) THEN
         scale=1.0_dp
-        IF (HSS(ng)%pioVar(idSbry(isUbar))%dkind.eq.PIO_double) THEN
-          ioDesc => ioDesc_dp_u2dobc(ng)
-        ELSE
-          ioDesc => ioDesc_sp_u2dobc(ng)
-        END IF
-!
         status=nf_fwrite2d_bry (ng, iADM, HSS(ng)%name,                 &
      &                          HSS(ng)%pioFile,                        &
      &                          Vname(1,idSbry(isUbar)),                &
@@ -810,18 +799,11 @@
 !
       IF (ANY(Lobc(:,isVbar,ng))) THEN
         scale=1.0_dp
-        IF (HSS(ng)%pioVar(idSbry(isVbar))%dkind.eq.PIO_double) THEN
-          ioDesc => ioDesc_dp_v2dobc(ng)
-        ELSE
-          ioDesc => ioDesc_sp_v2dobc(ng)
-        END IF
-!
         status=nf_fwrite2d_bry (ng, iADM, HSS(ng)%name,                 &
      &                          HSS(ng)%pioFile,                        &
      &                          Vname(1,idSbry(isVbar)),                &
      &                          HSS(ng)%pioVar(idSbry(isVbar)),         &
      &                          HSS(ng)%Rindex,                         &
-     &                          ioDesc,                                 &
      &                          LBij, UBij, Nbrec(ng), scale,           &
      &                          BOUNDARY(ng) % ad_vbar_obc(LBij:,:,:,   &
      &                                                     kout))
@@ -872,18 +854,11 @@
 !
       IF (ANY(Lobc(:,isUvel,ng))) THEN
         scale=1.0_dp
-        IF (HSS(ng)%pioVar(idSbry(isUvel))%dkind.eq.PIO_double) THEN
-          ioDesc => ioDesc_dp_u3dobc(ng)
-        ELSE
-          ioDesc => ioDesc_sp_u3dobc(ng)
-        END IF
-!
         status=nf_fwrite3d_bry (ng, iADM, HSS(ng)%name,                 &
      &                          HSS(ng)%pioFile,                        &
      &                          Vname(1,idSbry(isUvel)),                &
      &                          HSS(ng)%pioVar(idSbry(isUvel)),         &
      &                          HSS(ng)%Rindex,                         &
-     &                          ioDesc,                                 &
      &                          LBij, UBij, 1, N(ng), Nbrec(ng), scale, &
      &                          BOUNDARY(ng) % ad_u_obc(LBij:,:,:,:,    &
      &                                                  nout))
@@ -932,18 +907,11 @@
 !
       IF (ANY(Lobc(:,isVvel,ng))) THEN
         scale=1.0_dp
-        IF (HSS(ng)%pioVar(idSbry(isVvel))%dkind.eq.PIO_double) THEN
-          ioDesc => ioDesc_dp_v3dobc(ng)
-        ELSE
-          ioDesc => ioDesc_sp_v3dobc(ng)
-        END IF
-!
         status=nf_fwrite3d_bry (ng, iADM, HSS(ng)%name,                 &
      &                          HSS(ng)%pioFile,                        &
      &                          Vname(1,idSbry(isVvel)),                &
      &                          HSS(ng)%pioVar(idSbry(isVvel)),         &
      &                          HSS(ng)%Rindex,                         &
-     &                          ioDesc,                                 &
      &                          LBij, UBij, 1, N(ng), Nbrec(ng), scale, &
      &                          BOUNDARY(ng) % ad_v_obc(LBij:,:,:,:,    &
      &                                                  nout))
@@ -997,18 +965,12 @@
         IF (ANY(Lobc(:,isTvar(itrc),ng))) THEN
           scale=1.0_dp
           ifield=idSbry(isTvar(itrc))
-          IF (HSS(ng)%pioVar(ifield)%dkind.eq.PIO_double) THEN
-            ioDesc => ioDesc_dp_r3dobc(ng)
-          ELSE
-            ioDesc => ioDesc_sp_r3dobc(ng)
-          END IF
 !
           status=nf_fwrite3d_bry (ng, iADM, HSS(ng)%name,               &
      &                            HSS(ng)%pioFile,                      &
      &                            Vname(1,ifield),                      &
      &                            HSS(ng)%pioVar(ifield),               &
      &                            HSS(ng)%Rindex,                       &
-     &                            ioDesc,                               &
      &                            LBij, UBij, 1, N(ng), Nbrec(ng),      &
      &                            scale,                                &
      &                            BOUNDARY(ng) % ad_t_obc(LBij:,:,:,:,  &
@@ -1120,6 +1082,7 @@
         RETURN
       END IF
 #  endif
+#  ifndef DELAYED_SYNC_PIO
 !
 !-----------------------------------------------------------------------
 !  Synchronize Hessian eigenvectors NetCDF file to disk to allow other
@@ -1128,6 +1091,7 @@
 !
       CALL pio_netcdf_sync (ng, iADM, HSS(ng)%name, HSS(ng)%pioFile)
       IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+#  endif
 !
   10  FORMAT (2x,'WRT_HESSIAN_PIO  - writing Hessian', t42,            &
 #  ifdef SOLVE3D

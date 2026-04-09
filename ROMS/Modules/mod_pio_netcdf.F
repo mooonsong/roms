@@ -4,7 +4,7 @@
 !
 !git $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2025 The ROMS Group                              !
+!  Copyright (c) 2002-2026 The ROMS Group                              !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.md                                               !
 !=======================================================================
@@ -216,16 +216,6 @@
       TYPE (IO_desc_t), pointer :: ioDesZ_sp_u3dvar(:) ! (i,j,Nslice)
       TYPE (IO_desc_t), pointer :: ioDesZ_sp_v3dvar(:) ! (i,j,Nslice)
 # endif
-# ifdef ADJUST_BOUNDARY
-      TYPE (IO_desc_t), pointer :: ioDesc_sp_r2dobc(:) ! (ij,4,Nbrec)
-      TYPE (IO_desc_t), pointer :: ioDesc_sp_u2dobc(:) ! (ij,4,Nbrec)
-      TYPE (IO_desc_t), pointer :: ioDesc_sp_v2dobc(:) ! (ij,4,Nbrec)
-#  ifdef SOLVE3D
-      TYPE (IO_desc_t), pointer :: ioDesc_sp_r3dobc(:) ! (ij,N,4,Nbrec)
-      TYPE (IO_desc_t), pointer :: ioDesc_sp_u3dobc(:) ! (ij,N,4,Nbrec)
-      TYPE (IO_desc_t), pointer :: ioDesc_sp_v3dobc(:) ! (ij,N,4,Nbrec)
-#  endif
-# endif
 # ifdef ADJUST_STFLUX
       TYPE (IO_desc_t), pointer :: ioDesc_sp_r2dfrc(:) ! (i,j,Nfrec)
 # endif
@@ -263,16 +253,6 @@
       TYPE (IO_desc_t), pointer :: ioDesZ_dp_u3dvar(:) ! (i,j,Nslice)
       TYPE (IO_desc_t), pointer :: ioDesZ_dp_v3dvar(:) ! (i,j,Nslice)
 # endif
-# ifdef ADJUST_BOUNDARY
-      TYPE (IO_desc_t), pointer :: ioDesc_dp_r2dobc(:) ! (ij,4,Nbrec)
-      TYPE (IO_desc_t), pointer :: ioDesc_dp_u2dobc(:) ! (ij,4,Nbrec)
-      TYPE (IO_desc_t), pointer :: ioDesc_dp_v2dobc(:) ! (ij,4,Nbrec)
-#  ifdef SOLVE3D
-      TYPE (IO_desc_t), pointer :: ioDesc_dp_r3dobc(:) ! (ij,N,4,Nbrec)
-      TYPE (IO_desc_t), pointer :: ioDesc_dp_u3dobc(:) ! (ij,N,4,Nbrec)
-      TYPE (IO_desc_t), pointer :: ioDesc_dp_v3dobc(:) ! (ij,N,4,Nbrec)
-#  endif
-# endif
 # ifdef ADJUST_STFLUX
       TYPE (IO_desc_t), pointer :: ioDesc_dp_r2dfrc(:) ! (i,j,Nfrec)
 # endif
@@ -309,16 +289,6 @@
       TYPE (IO_desc_t), pointer :: ioDesX_sp_v3dvar(:) ! (i,j,N)
       TYPE (IO_desc_t), pointer :: ioDesX_sp_w3dvar(:) ! (i,j,0:N)
 #  endif
-#  ifdef ADJUST_BOUNDARY
-      TYPE (IO_desc_t), pointer :: ioDesX_sp_r2dobc(:) ! (ij,4,Nbrec)
-      TYPE (IO_desc_t), pointer :: ioDesX_sp_u2dobc(:) ! (ij,4,Nbrec)
-      TYPE (IO_desc_t), pointer :: ioDesX_sp_v2dobc(:) ! (ij,4,Nbrec)
-#   ifdef SOLVE3D
-      TYPE (IO_desc_t), pointer :: ioDesX_sp_r3dobc(:) ! (ij,N,4,Nbrec)
-      TYPE (IO_desc_t), pointer :: ioDesX_sp_u3dobc(:) ! (ij,N,4,Nbrec)
-      TYPE (IO_desc_t), pointer :: ioDesX_sp_v3dobc(:) ! (ij,N,4,Nbrec)
-#   endif
-#  endif
 #  ifdef ADJUST_STFLUX
       TYPE (IO_desc_t), pointer :: ioDesX_sp_r2dfrc(:) ! (i,j,Nfrec)
 #  endif
@@ -347,16 +317,6 @@
       TYPE (IO_desc_t), pointer :: ioDesX_dp_u3dvar(:) ! (i,j,N)
       TYPE (IO_desc_t), pointer :: ioDesX_dp_v3dvar(:) ! (i,j,N)
       TYPE (IO_desc_t), pointer :: ioDesX_dp_w3dvar(:) ! (i,j,0:N)
-#  endif
-#  ifdef ADJUST_BOUNDARY
-      TYPE (IO_desc_t), pointer :: ioDesX_dp_r2dobc(:) ! (ij,4,Nbrec)
-      TYPE (IO_desc_t), pointer :: ioDesX_dp_u2dobc(:) ! (ij,4,Nbrec)
-      TYPE (IO_desc_t), pointer :: ioDesX_dp_v2dobc(:) ! (ij,4,Nbrec)
-#   ifdef SOLVE3D
-      TYPE (IO_desc_t), pointer :: ioDesX_dp_r3dobc(:) ! (ij,N,4,Nbrec)
-      TYPE (IO_desc_t), pointer :: ioDesX_dp_u3dobc(:) ! (ij,N,4,Nbrec)
-      TYPE (IO_desc_t), pointer :: ioDesX_dp_v3dobc(:) ! (ij,N,4,Nbrec)
-#   endif
 #  endif
 #  ifdef ADJUST_STFLUX
       TYPE (IO_desc_t), pointer :: ioDesX_dp_r2dfrc(:) ! (i,j,Nfrec)
@@ -456,7 +416,7 @@
 !    PIO_iotype_netcdf4c => parallel read/serial write of NetCDF4 (HDF5)
 !    PIO_iotype_netcdf4p => parallel read/write of NETCDF4 (HDF5)
 !
-      integer pio_method
+      integer :: pio_method
 !
 !  PIO supported method names:
 !
@@ -8924,13 +8884,10 @@
           my_ncname(i:i)=' '
         END DO
 !
+!  Get filename, if any.
+!
         IF (.not.PRESENT(ncname)) THEN
-!
-!  Get filename, if any. It will be nice if there is a function in
-!  the NetCDF library to do this. Fortunately, the filename is
-!  written as a global attribute.
-!
-          status=PIO_get_att(pioFile, PIO_global, 'file', my_ncname)
+          my_ncname='Unknown'
         ELSE
           my_ncname=TRIM(ncname)
         END IF

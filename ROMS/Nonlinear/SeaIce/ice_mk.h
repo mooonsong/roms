@@ -2,7 +2,7 @@
 !
 !git $Id$
 !=======================================================================
-!  Copyright (c) 2002-2025 The ROMS Group           Paul Budgell       !
+!  Copyright (c) 2002-2026 The ROMS Group           Paul Budgell       !
 !    Licensed under a MIT/X style license           Katherine Hedstrom !
 !    See License_ROMS.md                            Scott M. Durski    !
 !================================================== Hernan G. Arango ===
@@ -967,7 +967,7 @@
      &                  LBi, UBi, LBj, UBj,                             &
      &                  stflx(:,:,itemp))
 
-      CALL ice_bc2d_tile (ng, tile, model, IsAice,                      &
+      CALL ice_bc2d_tile (ng, tile, model, isAice,                      &
      &                    LBi, UBi, LBj, UBj,                           &
      &                    IminS, ImaxS, JminS, JmaxS,                   &
      &                    liold, linew,                                 &

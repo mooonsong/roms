@@ -4,7 +4,7 @@
 !
 !git $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2025 The ROMS Group                              !
+!  Copyright (c) 2002-2026 The ROMS Group                              !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.md                                               !
 !=======================================================================
@@ -567,7 +567,7 @@
             Vinfo( 3)=Vname(3,ifield)
             Vinfo(14)=Vname(4,ifield)
             Vinfo(16)=Vname(1,idtime)
-            Vinfo(21)=Vname(6,ifield)
+            Vinfo(21)=Vname(6,idFsur)
             Aval(5)=REAL(Iinfo(1,ifield,ng),r8)
             status=def_var(ng, iTLM, NRM(ifile,ng)%ncid,                &
      &                     NRM(ifile,ng)%Vid(ifield),                   &
@@ -1530,7 +1530,7 @@
             Vinfo( 3)=Vname(3,ifield)
             Vinfo(14)=Vname(4,ifield)
             Vinfo(16)=Vname(1,idtime)
-            Vinfo(21)=Vname(6,ifield)
+            Vinfo(21)=Vname(6,idFsur)
             Aval(5)=REAL(Iinfo(1,ifield,ng),r8)
             NRM(ifile,ng)%pioVar(ifield)%dkind=PIO_FOUT
             NRM(ifile,ng)%pioVar(ifield)%gtype=r2dobc

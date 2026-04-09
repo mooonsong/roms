@@ -3,7 +3,7 @@
 !
 !git $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2025 The ROMS Group                              !
+!  Copyright (c) 2002-2026 The ROMS Group                              !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.md                                               !
 !=======================================================================
@@ -1725,7 +1725,7 @@
 # endif
 #endif
 #ifdef ICE_MODEL
-      nLBCvar=nLBCvar+11           ! ICE varibles up to isVice=11
+      nLBCvar=nLBCvar+15           ! ICE state variables, nIceS=15
 #endif
 !
       IF (.not.allocated(LBC)) THEN

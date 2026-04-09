@@ -4,7 +4,7 @@
 !
 !git $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2025 The ROMS Group                              !
+!  Copyright (c) 2002-2026 The ROMS Group                              !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.md                                               !
 !=======================================================================
@@ -785,11 +785,14 @@
         IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
       END IF
 # endif
+
+# if !(defined OUT_NETCDF4 && defined DELAYED_SYNC_NF90)
 !
 !  Synchronize NetCDF file to disk.
 !
       CALL netcdf_sync (ng, iNLM, DAV(ng)%name, DAV(ng)%ncid)
       IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+# endif
 !
 !  Reset "exit_flag" to its saved value when entering this routine.
 !
@@ -1480,11 +1483,13 @@
         IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
       END IF
 # endif
+# ifndef DELAYED_SYNC_PIO
 !
 !  Synchronize NetCDF file to disk.
 !
       CALL pio_netcdf_sync (ng, iNLM, DAV(ng)%name, DAV(ng)%pioFile)
       IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+# endif
 !
 !  Reset "exit_flag" to its saved value when entering this routine.
 !

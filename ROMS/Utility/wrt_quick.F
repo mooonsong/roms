@@ -3,7 +3,7 @@
 !
 !git $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2025 The ROMS Group                              !
+!  Copyright (c) 2002-2026 The ROMS Group                              !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.md                                               !
 !=======================================================================
@@ -1887,6 +1887,7 @@
     &                    Qout, QCK)
       IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
 #endif
+#if !(defined OUT_NETCDF4 && defined DELAYED_SYNC_NF90)
 !
 !-----------------------------------------------------------------------
 !  Synchronize quicksave NetCDF file to disk to allow other processes
@@ -1895,6 +1896,7 @@
 !
       CALL netcdf_sync (ng, model, QCK(ng)%name, QCK(ng)%ncid)
       IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+#endif
 !
   10  FORMAT (2x,'WRT_QUICK_NF90   - writing quicksave', t42,           &
 #ifdef SOLVE3D
@@ -4001,6 +4003,7 @@
     &                   Qout, QCK)
       IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
 # endif
+# ifndef DELAYED_SYNC_PIO
 !
 !-----------------------------------------------------------------------
 !  Synchronize quicksave NetCDF file to disk to allow other processes
@@ -4009,6 +4012,7 @@
 !
       CALL pio_netcdf_sync (ng, model, QCK(ng)%name, QCK(ng)%pioFile)
       IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+# endif
 !
   10  FORMAT (2x,'WRT_QUICK_PIO    - writing quicksave', t42,           &
 # ifdef SOLVE3D

@@ -10,7 +10,7 @@
 !
 !git $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2025 The ROMS Group                              !
+!  Copyright (c) 2002-2026 The ROMS Group                              !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.md                                               !
 !=======================================================================
@@ -65,12 +65,12 @@
 !
 !-----------------------------------------------------------------------
 !  Use Paulson and Simpson (1977) two wavelength bands solar
-!  absorption model.
+!  absorption model. Jerlov water type, Jwtype, has values 1 to 9.
 !-----------------------------------------------------------------------
 !
       DO j=Jstr,Jend
         DO i=Istr,Iend
-          Jindex=INT(MIXING(ng)%Jwtype(i,j))
+          Jindex=MAX(1, MIN(MIXING(ng)%Jwtype(i,j), 9))
           fac1(i)=Zscale/lmd_mu1(Jindex)
           fac2(i)=Zscale/lmd_mu2(Jindex)
           fac3(i)=lmd_r1(Jindex)

@@ -5,7 +5,7 @@
 !
 !git $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2025 The ROMS Group            Andrew M. Moore   !
+!  Copyright (c) 2002-2026 The ROMS Group            Andrew M. Moore   !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.md                                               !
 !=======================================================================
@@ -108,6 +108,10 @@
       USE cgradient_mod,      ONLY : cg_read_cgradient
 # endif
       USE close_io_mod,       ONLY : close_file
+# if defined OUT_NETCDF4 && defined DELAYED_SYNC_NF90 || \
+     defined PIO_LIB     && defined DELAYED_SYNC_PIO
+      USE close_io_mod,       ONLY : close_forward
+# endif
       USE cost_grad_mod,      ONLY : cost_grad
       USE def_hessian_mod,    ONLY : def_hessian
 # ifdef SPLIT_4DVAR
@@ -743,6 +747,17 @@
           IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
         END DO
       END IF
+
+# if defined OUT_NETCDF4 && defined DELAYED_SYNC_NF90 || \
+     defined PIO_LIB     && defined DELAYED_SYNC_PIO
+!
+!  If delayed NetCDF4 file synchronization is required to maximize
+!  performance, close forward trajectory and forward fluxes file
+!  to allow the ADM and TLM kernels to access them within the
+!  inner loops.
+!
+       CALL close_forward
+# endif
 
 # ifdef PROFILE
 !

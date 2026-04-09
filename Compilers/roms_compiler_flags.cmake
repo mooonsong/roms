@@ -1,6 +1,6 @@
 # git $Id$
 #:::::::::::::::::::::::::::::::::::::::::::::::::::::: David Robertson :::
-# Copyright (c) 2002-2025 The ROMS Group                                :::
+# Copyright (c) 2002-2026 The ROMS Group                                :::
 #   Licensed under a MIT/X style license                                :::
 #   See License_ROMS.md                                                 :::
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -16,6 +16,8 @@ set( my_cpu    "${CMAKE_SYSTEM_PROCESSOR}" )
 
 if( CMAKE_Fortran_COMPILER_ID MATCHES "GNU" )
   include( compiler_flags_GNU_Fortran )
+elseif( CMAKE_Fortran_COMPILER_ID MATCHES "IntelLLVM" )
+  include( compiler_flags_IntelLLVM_Fortran )
 elseif( CMAKE_Fortran_COMPILER_ID MATCHES "Intel" )
   include( compiler_flags_Intel_Fortran )
 else()

@@ -5,7 +5,7 @@
 !
 !git $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2025 The ROMS Group                              !
+!  Copyright (c) 2002-2026 The ROMS Group                              !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.md                                               !
 !=======================================================================
@@ -295,6 +295,7 @@
         END IF
       END DO
 # endif
+# if !(defined OUT_NETCDF4 && defined DELAYED_SYNC_NF90)
 !
 !-----------------------------------------------------------------------
 !  Synchronize Background standard deviation NetCDF file to disk to
@@ -303,6 +304,7 @@
 !
       CALL netcdf_sync (ng, iNLM, STD(5,ng)%name, STD(5,ng)%ncid)
       IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+# endif
 !
   10  FORMAT (2x,'WRT_STD_NF90     - writing standard deviation', t42,  &
 #  ifdef SOLVE3D
@@ -561,6 +563,7 @@
         END IF
       END DO
 #  endif
+#  ifndef DELAYED_SYNC_PIO
 !
 !-----------------------------------------------------------------------
 !  Synchronize Background standard deviation NetCDF file to disk to
@@ -570,6 +573,7 @@
       CALL pio_netcdf_sync (ng, iNLM, STD(5,ng)%name,                   &
      &                      STD(5,ng)%pioFile)
       IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
+#  endif
 !
   10  FORMAT (2x,'WRT_STD_PIO      - writing standard deviation', t42,  &
 #  ifdef SOLVE3D

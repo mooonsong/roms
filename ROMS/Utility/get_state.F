@@ -3,7 +3,7 @@
 !
 !git $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2025 The ROMS Group                              !
+!  Copyright (c) 2002-2026 The ROMS Group                              !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.md                                               !
 !=======================================================================
@@ -8043,6 +8043,9 @@
       ELSE IF (model.eq.17) THEN
         string='NRM: '                     ! normalization factor
         IDmod=iNLM                         ! surface forcing
+      ELSE IF (model.eq.19) THEN
+        string='ITL: '                     ! cummulative increments for
+        IDmod=iTLM                         ! Incremental Analysis Update
       END IF
 
 # ifdef PROFILE
@@ -10700,15 +10703,13 @@
             my_pioVar%gtype=r2dobc
             IF (KIND(BOUNDARY(ng)%tl_zeta_obc).eq.8) THEN
               my_pioVar%dkind=PIO_double
-              ioDesc => ioDesc_dp_r2dobc(ng)
             ELSE
               my_pioVar%dkind=PIO_real
-              ioDesc => ioDesc_sp_r2dobc(ng)
             END IF
 !
             status=nf_fread2d_bry(ng, IDmod, ncname, pioFile,           &
      &                            Vname(1,ifield), my_pioVar,           &
-     &                            InpRec, ioDesc,                       &
+     &                            InpRec,                               &
      &                            LBij, UBij, Nbrec(ng),                &
      &                            Fscl, Fmin, Fmax,                     &
 #   ifdef CHECKSUM
@@ -10826,15 +10827,13 @@
             my_pioVar%gtype=u2dobc
             IF (KIND(BOUNDARY(ng)%tl_ubar_obc).eq.8) THEN
               my_pioVar%dkind=PIO_double
-              ioDesc => ioDesc_dp_u2dobc(ng)
             ELSE
               my_pioVar%dkind=PIO_real
-              ioDesc => ioDesc_sp_u2dobc(ng)
             END IF
 !
             status=nf_fread2d_bry(ng, IDmod, ncname, pioFile,           &
      &                            Vname(1,ifield), my_pioVar,           &
-     &                            InpRec, ioDesc,                       &
+     &                            InpRec,                               &
      &                            LBij, UBij, Nbrec(ng),                &
      &                            Fscl, Fmin, Fmax,                     &
 #   ifdef CHECKSUM
@@ -10952,15 +10951,13 @@
             my_pioVar%gtype=v2dobc
             IF (KIND(BOUNDARY(ng)%tl_vbar_obc).eq.8) THEN
               my_pioVar%dkind=PIO_double
-              ioDesc => ioDesc_dp_v2dobc(ng)
             ELSE
               my_pioVar%dkind=PIO_real
-              ioDesc => ioDesc_sp_v2dobc(ng)
             END IF
 !
             status=nf_fread2d_bry(ng, IDmod, ncname, pioFile,           &
      &                            Vname(1,ifield), my_pioVar,           &
-     &                            InpRec, ioDesc,                       &
+     &                            InpRec,                               &
      &                            LBij, UBij, Nbrec(ng),                &
      &                            Fscl, Fmin, Fmax,                     &
 #   ifdef CHECKSUM
@@ -11210,15 +11207,13 @@
             my_pioVar%gtype=u3dobc
             IF (KIND(BOUNDARY(ng)%tl_u_obc).eq.8) THEN
               my_pioVar%dkind=PIO_double
-              ioDesc => ioDesc_dp_u3dobc(ng)
             ELSE
               my_pioVar%dkind=PIO_real
-              ioDesc => ioDesc_sp_u3dobc(ng)
             END IF
 !
             status=nf_fread3d_bry(ng, IDmod, ncname, pioFile,           &
      &                            Vname(1,ifield), my_pioVar,           &
-     &                            InpRec, ioDesc,                       &
+     &                            InpRec,                               &
      &                            LBij, UBij, 1, N(ng), Nbrec(ng),      &
      &                            Fscl, Fmin, Fmax,                     &
 #   ifdef CHECKSUM
@@ -11336,15 +11331,13 @@
             my_pioVar%gtype=v3dobc
             IF (KIND(BOUNDARY(ng)%tl_v_obc).eq.8) THEN
               my_pioVar%dkind=PIO_double
-              ioDesc => ioDesc_dp_v3dobc(ng)
             ELSE
               my_pioVar%dkind=PIO_real
-              ioDesc => ioDesc_sp_v3dobc(ng)
             END IF
 !
             status=nf_fread3d_bry(ng, IDmod, ncname, pioFile,           &
      &                            Vname(1,ifield), my_pioVar,           &
-     &                            InpRec, ioDesc,                       &
+     &                            InpRec,                               &
      &                            LBij, UBij, 1, N(ng), Nbrec(ng),      &
      &                            Fscl, Fmin, Fmax,                     &
 #    ifdef CHECKSUM
@@ -11466,15 +11459,13 @@
               my_pioVar%gtype=r3dobc
               IF (KIND(BOUNDARY(ng)%tl_t_obc).eq.8) THEN
                 my_pioVar%dkind=PIO_double
-                ioDesc => ioDesc_dp_r3dobc(ng)
               ELSE
                 my_pioVar%dkind=PIO_real
-                ioDesc => ioDesc_sp_r3dobc(ng)
               END IF
 !
               status=nf_fread3d_bry(ng, IDmod, ncname, pioFile,         &
      &                              Vname(1,ifield), my_pioVar,         &
-     &                              InpRec, ioDesc,                     &
+     &                              InpRec,                             &
      &                              LBij, UBij, 1, N(ng), Nbrec(ng),    &
      &                              Fscl, Fmin, Fmax,                   &
 #    ifdef CHECKSUM
@@ -12065,15 +12056,13 @@
             my_pioVar%gtype=r2dobc
             IF (KIND(BOUNDARY(ng)%ad_zeta_obc).eq.8) THEN
               my_pioVar%dkind=PIO_double
-              ioDesc => ioDesc_dp_r2dobc(ng)
             ELSE
               my_pioVar%dkind=PIO_real
-              ioDesc => ioDesc_sp_r2dobc(ng)
             END IF
 !
             status=nf_fread2d_bry(ng, IDmod, ncname, pioFile,           &
      &                            Vname(1,ifield), my_pioVar,           &
-     &                            InpRec, ioDesc,                       &
+     &                            InpRec,                               &
      &                            LBij, UBij, Nbrec(ng),                &
      &                            Fscl, Fmin, Fmax,                     &
 #   ifdef CHECKSUM
@@ -12191,15 +12180,13 @@
             my_pioVar%gtype=u2dobc
             IF (KIND(BOUNDARY(ng)%ad_ubar_obc).eq.8) THEN
               my_pioVar%dkind=PIO_double
-              ioDesc => ioDesc_dp_u2dobc(ng)
             ELSE
               my_pioVar%dkind=PIO_real
-              ioDesc => ioDesc_sp_u2dobc(ng)
             END IF
 !
             status=nf_fread2d_bry(ng, IDmod, ncname, pioFile,           &
      &                            Vname(1,ifield), my_pioVar,           &
-     &                            InpRec, ioDesc,                       &
+     &                            InpRec,                               &
      &                            LBij, UBij, Nbrec(ng),                &
      &                            Fscl, Fmin, Fmax,                     &
 #   ifdef CHECKSUM
@@ -12317,15 +12304,13 @@
             my_pioVar%gtype=v2dobc
             IF (KIND(BOUNDARY(ng)%ad_vbar_obc).eq.8) THEN
               my_pioVar%dkind=PIO_double
-              ioDesc => ioDesc_dp_v2dobc(ng)
             ELSE
               my_pioVar%dkind=PIO_real
-              ioDesc => ioDesc_sp_v2dobc(ng)
             END IF
 !
             status=nf_fread2d_bry(ng, IDmod, ncname, pioFile,           &
      &                            Vname(1,ifield), my_pioVar,           &
-     &                            InpRec, ioDesc,                       &
+     &                            InpRec,                               &
      &                            LBij, UBij, Nbrec(ng),                &
      &                            Fscl, Fmin, Fmax,                     &
 #   ifdef CHECKSUM
@@ -12576,15 +12561,13 @@
             my_pioVar%gtype=u3dobc
             IF (KIND(BOUNDARY(ng)%ad_u_obc).eq.8) THEN
               my_pioVar%dkind=PIO_double
-              ioDesc => ioDesc_dp_u3dobc(ng)
             ELSE
               my_pioVar%dkind=PIO_real
-              ioDesc => ioDesc_sp_u3dobc(ng)
             END IF
 !
             status=nf_fread3d_bry(ng, IDmod, ncname, pioFile,           &
      &                            Vname(1,ifield), my_pioVar,           &
-     &                            InpRec, ioDesc,                       &
+     &                            InpRec,                               &
      &                            LBij, UBij, 1, N(ng), Nbrec(ng),      &
      &                            Fscl, Fmin, Fmax,                     &
 #    ifdef CHECKSUM
@@ -12703,15 +12686,13 @@
             my_pioVar%gtype=v3dobc
             IF (KIND(BOUNDARY(ng)%ad_v_obc).eq.8) THEN
               my_pioVar%dkind=PIO_double
-              ioDesc => ioDesc_dp_v3dobc(ng)
             ELSE
               my_pioVar%dkind=PIO_real
-              ioDesc => ioDesc_sp_v3dobc(ng)
             END IF
 !
             status=nf_fread3d_bry(ng, IDmod, ncname, pioFile,           &
      &                            Vname(1,ifield), my_pioVar,           &
-     &                            InpRec, ioDesc,                       &
+     &                            InpRec,                               &
      &                            LBij, UBij, 1, N(ng), Nbrec(ng),      &
      &                            Fscl, Fmin, Fmax,                     &
 #    ifdef CHECKSUM
@@ -12833,15 +12814,13 @@
               my_pioVar%gtype=r3dobc
               IF (KIND(BOUNDARY(ng)%ad_t_obc).eq.8) THEN
                 my_pioVar%dkind=PIO_double
-                ioDesc => ioDesc_dp_r3dobc(ng)
               ELSE
                 my_pioVar%dkind=PIO_real
-                ioDesc => ioDesc_sp_r3dobc(ng)
               END IF
 !
               status=nf_fread3d_bry(ng, IDmod, ncname, pioFile,         &
      &                              Vname(1,ifield), my_pioVar,         &
-     &                              InpRec, ioDesc,                     &
+     &                              InpRec,                             &
      &                              LBij, UBij, 1, N(ng), Nbrec(ng),    &
      &                              Fscl, Fmin, Fmax,                   &
 #    ifdef CHECKSUM
@@ -15841,15 +15820,13 @@
             my_pioVar%gtype=r2dobc
             IF (KIND(BOUNDARY(ng)%tl_zeta_obc).eq.8) THEN
               my_pioVar%dkind=PIO_double
-              ioDesc => ioDesc_dp_r2dobc(ng)
             ELSE
               my_pioVar%dkind=PIO_real
-              ioDesc => ioDesc_sp_r2dobc(ng)
             END IF
 !
             status=nf_fread2d_bry(ng, IDmod, ncname, pioFile,           &
      &                            Vname(1,ifield), my_pioVar,           &
-     &                            InpRec, ioDesc,                       &
+     &                            InpRec,                               &
      &                            LBij, UBij, Nbrec(ng),                &
      &                            Fscl, Fmin, Fmax,                     &
 #   ifdef CHECKSUM
@@ -15903,15 +15880,13 @@
             my_pioVar%gtype=u2dobc
             IF (KIND(BOUNDARY(ng)%tl_ubar_obc).eq.8) THEN
               my_pioVar%dkind=PIO_double
-              ioDesc => ioDesc_dp_u2dobc(ng)
             ELSE
               my_pioVar%dkind=PIO_real
-              ioDesc => ioDesc_sp_u2dobc(ng)
             END IF
 !
             status=nf_fread2d_bry(ng, IDmod, ncname, pioFile,           &
      &                            Vname(1,ifield), my_pioVar,           &
-     &                            InpRec, ioDesc,            &
+     &                            InpRec,                               &
      &                            LBij, UBij, Nbrec(ng),                &
      &                            Fscl, Fmin, Fmax,                     &
 #   ifdef CHECKSUM
@@ -15965,15 +15940,13 @@
             my_pioVar%gtype=v2dobc
             IF (KIND(BOUNDARY(ng)%tl_vbar_obc).eq.8) THEN
               my_pioVar%dkind=PIO_double
-              ioDesc => ioDesc_dp_v2dobc(ng)
             ELSE
               my_pioVar%dkind=PIO_real
-              ioDesc => ioDesc_sp_v2dobc(ng)
             END IF
 !
             status=nf_fread2d_bry(ng, IDmod, ncname, pioFile,           &
      &                            Vname(1,ifield), my_pioVar,           &
-     &                            InpRec, ioDesc,                       &
+     &                            InpRec,                               &
      &                            LBij, UBij, Nbrec(ng),                &
      &                            Fscl, Fmin, Fmax,                     &
 #   ifdef CHECKSUM
@@ -16029,15 +16002,13 @@
             my_pioVar%gtype=u3dobc
             IF (KIND(BOUNDARY(ng)%tl_u_obc).eq.8) THEN
               my_pioVar%dkind=PIO_double
-              ioDesc => ioDesc_dp_u3dobc(ng)
             ELSE
               my_pioVar%dkind=PIO_real
-              ioDesc => ioDesc_sp_u3dobc(ng)
             END IF
 !
             status=nf_fread3d_bry(ng, IDmod, ncname, pioFile,           &
      &                            Vname(1,ifield), my_pioVar,           &
-     &                            InpRec, ioDesc,                       &
+     &                            InpRec,                               &
      &                            LBij, UBij, 1, N(ng), Nbrec(ng),      &
      &                            Fscl, Fmin, Fmax,                     &
 #    ifdef CHECKSUM
@@ -16091,15 +16062,13 @@
             my_pioVar%gtype=v3dobc
             IF (KIND(BOUNDARY(ng)%tl_v_obc).eq.8) THEN
               my_pioVar%dkind=PIO_double
-              ioDesc => ioDesc_dp_v3dobc(ng)
             ELSE
               my_pioVar%dkind=PIO_real
-              ioDesc => ioDesc_sp_v3dobc(ng)
             END IF
 !
             status=nf_fread3d_bry(ng, IDmod, ncname, pioFile,           &
      &                            Vname(1,ifield), my_pioVar,           &
-     &                            InpRec, ioDesc,                       &
+     &                            InpRec,                               &
      &                            LBij, UBij, 1, N(ng), Nbrec(ng),      &
      &                            Fscl, Fmin, Fmax,                     &
 #    ifdef CHECKSUM
@@ -16155,15 +16124,13 @@
               my_pioVar%gtype=r3dobc
               IF (KIND(BOUNDARY(ng)%tl_t_obc).eq.8) THEN
                 my_pioVar%dkind=PIO_double
-                ioDesc => ioDesc_dp_r3dobc(ng)
               ELSE
                 my_pioVar%dkind=PIO_real
-                ioDesc => ioDesc_sp_r3dobc(ng)
               END IF
 !
               status=nf_fread3d_bry(ng, IDmod, ncname, pioFile,         &
      &                              Vname(1,ifield), my_pioVar,         &
-     &                              InpRec, ioDesc,                     &
+     &                              InpRec,                             &
      &                              LBij, UBij, 1, N(ng), Nbrec(ng),    &
      &                              Fscl, Fmin, Fmax,                   &
 #    ifdef CHECKSUM

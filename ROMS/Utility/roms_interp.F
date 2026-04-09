@@ -3,7 +3,7 @@
 !
 !git $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2025 The ROMS Group                              !
+!  Copyright (c) 2002-2026 The ROMS Group                              !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.md                                               !
 !=======================================================================
@@ -813,7 +813,7 @@
 !  If appropriate, open source NetCDF, inquire about dimesions and
 !  variables.
 !
-      IF (self%pioFile%fh.eq.0) THEN
+      IF (self%pioFile%fh.eq.-1) THEN
         IF (FoundError(assign_string(self%ncname, ncname),              &
      &                 NoError, __LINE__, MyFile)) RETURN
 !

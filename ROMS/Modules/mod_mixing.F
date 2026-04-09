@@ -3,7 +3,7 @@
 !
 !git $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2025 The ROMS Group                              !
+!  Copyright (c) 2002-2026 The ROMS Group                              !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.md                                               !
 !=======================================================================
@@ -162,7 +162,7 @@
 #  endif
 # endif
 # if defined LMD_SKPP || defined SOLAR_SOURCE
-          real(r8),  pointer :: Jwtype(:,:)
+          integer,  pointer :: Jwtype(:,:)
 # endif
 #endif
 #if defined DIFF_3DCOEF && defined SOLVE3D
@@ -1524,7 +1524,7 @@
 # endif
 # if defined LMD_SKPP || defined SOLAR_SOURCE
           DO i=Imin,Imax
-            MIXING(ng) % Jwtype(i,j) = REAL(lmd_Jwt(ng),r8)
+            MIXING(ng) % Jwtype(i,j) = lmd_Jwt(ng)
           END DO
 # endif
 # if defined LMD_SKPP || defined LMD_BKPP

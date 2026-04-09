@@ -5,7 +5,7 @@
 !
 !git $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2025 The ROMS Group            Andrew M. Moore   !
+!  Copyright (c) 2002-2026 The ROMS Group            Andrew M. Moore   !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.md                                               !
 !=======================================================================
@@ -103,6 +103,10 @@
       USE ad_wrt_his_mod,     ONLY : ad_wrt_his
 # ifdef STD_MODEL
       USE background_std_mod, ONLY : background_std
+# endif
+# if defined OUT_NETCDF4 && defined DELAYED_SYNC_NF90 || \
+     defined PIO_LIB     && defined DELAYED_SYNC_PIO
+      USE close_io_mod,       ONLY : close_forward
 # endif
 # ifndef RPCG
       USE congrad_mod,        ONLY : congrad
@@ -605,6 +609,17 @@
           FOURDVAR(ng)%NLPenalty=0.0_r8
         END DO
       END IF
+
+# if defined OUT_NETCDF4 && defined DELAYED_SYNC_NF90 || \
+     defined PIO_LIB     && defined DELAYED_SYNC_PIO
+!
+!  If delayed NetCDF4 file synchronization is required to maximize
+!  performance, close forward trajectory and forward fluxes file
+!  to allow the ADM and TLM kernels to access them within the
+!  inner loops.
+!
+       CALL close_forward
+# endif
 
 # ifdef PROFILE
 !

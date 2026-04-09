@@ -4,7 +4,7 @@
 !
 !git $Id$
 !================================================== Hernan G. Arango ===
-!  Copyright (c) 2002-2025 The ROMS Group                              !
+!  Copyright (c) 2002-2026 The ROMS Group                              !
 !    Licensed under a MIT/X style license                              !
 !    See License_ROMS.md                                               !
 !=======================================================================
@@ -1395,7 +1395,7 @@
      &                OCEAN(ng) % uG)
       IF (FoundError(exit_flag, NoError, __LINE__, MyFile)) RETURN
 !
-      CALL get_3dfld (ng, iRPM, idVvel, FWD(ng)%ncid,                   &
+      CALL get_3dfld (ng, iTLM, idVvel, FWD(ng)%ncid,                   &
 #   if defined PIO_LIB && defined DISTRIBUTE
      &                FWD(ng)%pioFile,                                  &
 #   endif
